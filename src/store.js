@@ -1,11 +1,13 @@
-import Vuex from 'vuex'
-import Vue from 'vue'
+//import Vuex from 'vuex'
+//import Vue from 'vue'
 import { modifyGeoJSON } from './controllers/leafletMap'
 import { highlightSelectedFeatureInCodeArea } from './controllers/codeMirror'
 
-Vue.use(Vuex)
+//Vue.use(Vuex)
 
-export default new Vuex.Store({
+import { createStore } from 'vuex'
+
+export const store = createStore({
   state: {
     selectedProperties: null,
     requiresParseFixing: false,
@@ -32,7 +34,7 @@ export default new Vuex.Store({
     },
     setSelectedProperties (state, feature)  {
       state.selectedProperties = feature.properties
-      // highlightSelectedFeatureInCodeArea(feature, state.geojsonString)
+      highlightSelectedFeatureInCodeArea(feature, state.geojsonString)
     },
     setRequiresParsingFix (state, bool) {
       state.requiresParseFixing = bool

@@ -1,6 +1,5 @@
 <template>
-  <Row id="bottomMenu">
-    <Tooltip content="Sign in to Github to share" :disabled="hasGhAccessToken" style="float: left; margin-left: 20px">
+    <!-- <Tooltip content="Sign in to Github to share" :disabled="hasGhAccessToken" style="float: left; margin-left: 20px">
       <Button
         :disabled="!hasGhAccessToken"
         :loading="creatingGist"
@@ -15,7 +14,7 @@
           Share
         </span>
       </Button>
-    </Tooltip>
+    </Tooltip> -->
 
     <Button
       style="float: left; margin-left: 20px"
@@ -31,7 +30,7 @@
         <a href="javascript:void(0)">
           <Button icon="md-arrow-dropup" />
         </a>
-        <DropdownMenu slot="list">
+        <DropdownMenu>
           <DropdownItem v-for="format in supportedFormats" :key="format.value" :name="format.value" :disabled="format.disabled">
             {{ format.label }}
           </DropdownItem>
@@ -46,16 +45,16 @@
     >
       <Input v-model="remoteUrl" placeholder="Url of geojson" style="width: 300px" />
     </Modal>
-  </Row>
+
 </template>
 
 <script>
 import FileSaver from 'file-saver'
-import { topology } from 'topojson-server'
-import wkt from 'wellknown'
-import shape from 'shp-write'
+// import { topology } from 'topojson-server'
+// import wkt from 'wellknown'
+//import shape from 'shp-write'
 import axios from 'axios'
-import lint from '@mapbox/geojsonhint'
+//import lint from '@mapbox/geojsonhint'
 import { zoomToFeatures } from '../controllers/leafletMap'
 
 export default {
@@ -63,37 +62,37 @@ export default {
   data () {
     return {
       loadDataModal: false,
-      creatingGist: false,
+      // creatingGist: false,
       remoteUrl: ''
     }
   },
   computed: {
-    hasGhAccessToken: function () {
-      return this.$store.state.githubAccessToken !== null
-    },
-    supportedFormats: function () {
-      return [{
-        label: 'Shapefile',
-        value: 'shp',
-        disabled: false
-      },
-      {
-        label: 'TopoJSON',
-        value: 'topojson',
-        disabled: false
-      },
-      {
-        label: 'WKT',
-        value: 'wkt',
-        disabled: false
-      },
-      {
-        label: 'Github Gist',
-        value: 'gist',
-        disabled: !this.hasGhAccessToken
-      }
-      ]
-    }
+    // hasGhAccessToken: function () {
+    //   return this.$store.state.githubAccessToken !== null
+    // },
+    // supportedFormats: function () {
+    //   return [{
+    //     label: 'Shapefile',
+    //     value: 'shp',
+    //     disabled: false
+    //   },
+    //   {
+    //     label: 'TopoJSON',
+    //     value: 'topojson',
+    //     disabled: false
+    //   },
+    //   {
+    //     label: 'WKT',
+    //     value: 'wkt',
+    //     disabled: false
+    //   },
+    //   {
+    //     label: 'Github Gist',
+    //     value: 'gist',
+    //     disabled: !this.hasGhAccessToken
+    //   }
+    //   ]
+    // }
   },
   methods: {
     openModal: function () {
@@ -102,20 +101,20 @@ export default {
     loadFromUrl: async function () {
       try {
         const response = await axios.get(this.remoteUrl)
-        const errors = lint.hint(response.data)
-        let hadParsingError = false
-        errors.forEach(function (err) {
-          if (err.message.startsWith('Parse error')) {
-            hadParsingError = true
-          }
-        })
-        if (hadParsingError) {
-          this.$Notice.error({
-            title: 'Could not parse geojson',
-            desc: 'The specified file could not be parsed as geojson'
-          });
-          return
-        }
+//        const errors = lint.hint(response.data)
+//        let hadParsingError = false
+        // errors.forEach(function (err) {
+        //   if (err.message.startsWith('Parse error')) {
+        //     hadParsingError = true
+        //   }
+        // })
+        // if (hadParsingError) {
+        //   this.$Notice.error({
+        //     title: 'Could not parse geojson',
+        //     desc: 'The specified file could not be parsed as geojson'
+        //   });
+        //   return
+        // }
         this.$store.commit('setGeoJSON', response.data)
         zoomToFeatures()
       } catch (error) {
@@ -131,78 +130,78 @@ export default {
       });
       FileSaver.saveAs(file);
     },
-    createShare: async function () {
-      this.creatingGist = true
-      const that = this
-      const response = await this.createGist()
-      this.creatingGist = false
-      const newUrl = new URL(document.location)
-      let params = newUrl.searchParams;
-      params.delete('gist')
-      params.append('gist', response.data.id);
-      window.history.pushState({}, null, newUrl)
-      navigator.clipboard.writeText(newUrl).then(function() {
-        that.$Notice.open({
-          title: "Share",
-          desc: 'Share copied to clipboard',
-        })
-      })
-    },
-    createGist: async function () {
-      const that = this;
-      return await axios({
-          url: 'https://api.github.com/gists',
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            Authorization: `token ${that.$store.state.githubAccessToken}`
-          },
-          data: {
-            "description": "GeoJson saved from geojson-editor",
-            "public": true,
-            "files": {
-              "data.geojson": {
-                "content": that.$store.state.geojsonString
-              }
-            }
-          }
-      })
-    },
+    // createShare: async function () {
+    //   this.creatingGist = true
+    //   const that = this
+    //   const response = await this.createGist()
+    //   this.creatingGist = false
+    //   const newUrl = new URL(document.location)
+    //   let params = newUrl.searchParams;
+    //   params.delete('gist')
+    //   params.append('gist', response.data.id);
+    //   window.history.pushState({}, null, newUrl)
+    //   navigator.clipboard.writeText(newUrl).then(function() {
+    //     that.$Notice.open({
+    //       title: "Share",
+    //       desc: 'Share copied to clipboard',
+    //     })
+    //   })
+    // },
+    // createGist: async function () {
+    //   const that = this;
+    //   return await axios({
+    //       url: 'https://api.github.com/gists',
+    //       method: 'POST',
+    //       headers: {
+    //         Accept: 'application/json',
+    //         Authorization: `token ${that.$store.state.githubAccessToken}`
+    //       },
+    //       data: {
+    //         "description": "GeoJson saved from geojson-editor",
+    //         "public": true,
+    //         "files": {
+    //           "data.geojson": {
+    //             "content": that.$store.state.geojsonString
+    //           }
+    //         }
+    //       }
+    //   })
+    // },
     saveInFormats: async function (e) {
       let outData = null
       let outName = e
 
-      if (e === 'gist') {
-        const r = await this.createGist()
-        this.$Notice.open({
-          title: 'Gist created',
-          desc: r.data.id
-        })
-        return
-      }
-      if (e === 'topojson') {
-        outData = topology(this.$store.getters.geojson.features)
-      }
-      if (e === 'wkt') {
-        outData = wkt.stringify({
-          type: 'GeometryCollection',
-          geometries: this.$store.getters.geojson.features.map(function (f) {
-            return f.geometry
-          })
-        })
-      }
-      if (e === 'shp') {
-        var options = {
-            folder: 'myshapes',
-            types: {
-                point: 'mypoints',
-                polygon: 'mypolygons',
-                line: 'mylines'
-            }
-        }
-        shape.download(this.$store.getters.geojson, options)
-        return
-      }
+      // if (e === 'gist') {
+      //   const r = await this.createGist()
+      //   this.$Notice.open({
+      //     title: 'Gist created',
+      //     desc: r.data.id
+      //   })
+      //   return
+      // }
+      // if (e === 'topojson') {
+      //   outData = topology(this.$store.getters.geojson.features)
+      // }
+      // if (e === 'wkt') {
+      //   outData = wkt.stringify({
+      //     type: 'GeometryCollection',
+      //     geometries: this.$store.getters.geojson.features.map(function (f) {
+      //       return f.geometry
+      //     })
+      //   })
+      // }
+      // if (e === 'shp') {
+      //   var options = {
+      //       folder: 'myshapes',
+      //       types: {
+      //           point: 'mypoints',
+      //           polygon: 'mypolygons',
+      //           line: 'mylines'
+      //       }
+      //   }
+      //   shape.download(this.$store.getters.geojson, options)
+      //   return
+      // }
 
       var file = new File([JSON.stringify(outData)], `export.${outName}`, {
         type: "text/plain;charset=utf-8"

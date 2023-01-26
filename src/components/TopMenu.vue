@@ -1,5 +1,4 @@
 <template>
-  <Row class="topMenu">
     <Dropdown
       placement="bottom-start"
       class="toolsDropdown"
@@ -10,7 +9,7 @@
           Tools <Icon type="md-arrow-dropdown" />
         </Button>
       </a>
-      <DropdownMenu slot="list">
+      <DropdownMenu>
         <DropdownItem name="createRandomPoints">
           Create Random Points
         </DropdownItem>
@@ -22,9 +21,9 @@
         </DropdownItem>
         <Dropdown placement="right-start" @on-click="handleFixClick">
           <DropdownItem>
-            Fix Errors <Icon type="ios-arrow-forward"></Icon>
+            Fix Errors <Icon type="ios-arrow-forward" />
           </DropdownItem>
-          <DropdownMenu slot="list">
+          <DropdownMenu>
             <DropdownItem name="addMarks" :disabled="doesntRequireParseFixing">
               Fix Quotation Marks on Keys
             </DropdownItem>
@@ -67,7 +66,7 @@
       <p><strong>Bounding box</strong></p>
       <Input v-model="bbox" style="width: 300px" />
     </Modal>
-  </Row>
+
 </template>
 
 <script>

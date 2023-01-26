@@ -1,86 +1,29 @@
 <template>
-  <Row id="app">
-    <Map />
-    <Sidebar :loading-github-user="loadingGithubUser" />
-    <Properties />
-  </Row>
+  <Geo />
+  <SideMenu />
 </template>
 
 <script>
-import axios from 'axios'
-import Map from './components/Map.vue'
-import Sidebar from './components/Sidebar.vue'
-import Properties from './components/Properties.vue'
-import store from './store'
+import Geo from './components/Geo.vue'
+import SideMenu from './components/SideMenu.vue'
 
 export default {
   name: 'App',
-  store: store,
   components: {
-    Map,
-    Sidebar,
-    Properties
-  },
-  data () {
-    return {
-      loadingGithubUser: false
-    }
-  },
-  mounted: async function () {
-    const thisUrl = new URL(document.location)
-
-    let params = thisUrl.searchParams;
-
-    if (params.get("data")) {
-      let prettyGeojsonString = JSON.stringify(JSON.parse(params.get("data")), null, 2)
-      this.$store.commit('setGeoJSON', prettyGeojsonString)
-    } else if (params.get("gist")) {
-      const gistId = params.get("gist")
-      const d = await axios.get(`https://api.github.com/gists/${gistId}`)
-      const fileNames = Object.keys(d.data.files)
-      const data = await axios.get(d.data.files[fileNames[0]].raw_url)
-      this.$store.commit('setGeoJSON', data.data)
-    }
-
-    this.$Notice.config({
-      top: 100,
-      duration: 3
-    });
-
-    const that = this
-    window.oauthCallback = async function (code) {
-      that.loadingGithubUser = true
-      const resp = await axios.get('https://github-auth-app.glitch.me/tokenGenerator', {
-        params: {
-          code
-        }
-      })
-      that.$store.commit('setGitHubAccessToken', resp.data.access_token)
-      const d = await axios({
-        method: 'get',
-        url: 'https://api.github.com/user',
-        headers: {
-          "Authorization": `token ${resp.data.access_token}`
-        }
-      })
-      that.loadingGithubUser = false
-
-      that.$store.commit('setGitHubUsername', d.data)
-    }
+    Geo,
+    SideMenu
   }
 }
 </script>
 
-<style lang="scss">
-
-html, body, #app {
-  margin: 0px;
-  width: 100%;
-  height: 100%;
-
-  .ivu-notice {
-    width: 200px;
-  }
-
+<style>
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 60px;
+  height: 100vh;
 }
 </style>

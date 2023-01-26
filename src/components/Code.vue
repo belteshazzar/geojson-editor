@@ -1,32 +1,30 @@
 <template>
-  <Row id="codeArea">
     <Button class="copy" icon="md-copy" @click="copy">
       Copy
     </Button>
-    <codemirror
+    <Codemirror
       ref="myCm"
       :value="code"
       :options="cmOptions"
       @input="onCmCodeChange"
     />
-  </Row>
 </template>
 
 <script>
-import { codemirror } from 'vue-codemirror'
-import 'codemirror/lib/codemirror.css'
-import 'codemirror/theme/base16-light.css'
-import 'codemirror/addon/selection/active-line.js'
-import 'codemirror/mode/javascript/javascript.js'
+import { Codemirror } from 'vue-codemirror'
+// import 'codemirror/lib/codemirror.css'
+// import 'codemirror/theme/base16-light.css'
+// import 'codemirror/addon/selection/active-line.js'
+// import 'codemirror/mode/javascript/javascript.js'
 
-import lint from '@mapbox/geojsonhint'
+// import lint from '@mapbox/geojsonhint'
 import { setupCodeMirrorRefs } from '../controllers/codeMirror'
 
 
 export default {
   name: 'CodeArea',
   components: {
-    codemirror
+    Codemirror
   },
   data () {
     return {
@@ -60,39 +58,39 @@ export default {
         that.$Notice.open({
           desc: 'Copied to clipboard',
         })
-      }, function (err) {
+      }, function () {
         // If we fail fallback to the old slow way
         const el = document.createElement('textarea');
         el.value = this.$store.state.geojsonString;
         document.body.appendChild(el);
         el.select();
         document.execCommand('copy');
-        document.body.removeChild(el);xw
+        document.body.removeChild(el);
         this.$Notice.open({
           desc: 'Copied to clipboard'
         })
       });
     },
-    onCmCodeChange: function (newGeojsonString) {
+    onCmCodeChange: function () {
       this.cleanErrorMarks()
 
-      this.errors = lint.hint(newGeojsonString)
+      // this.errors = lint.hint(newGeojsonString)
 
-      let hadParsingError = false
-      this.errors.forEach(function (err) {
-        if (err.message.startsWith('Parse error')) {
-          hadParsingError = true
-          this.$store.commit('setDodgyString', newGeojsonString)
-        } else if (err.message.startsWith('Polygons and MultiPolygons')) {
-          this.$store.commit('setRequiresWindingOrderFix', true)
-        }
-      }, this)
-      this.$store.commit('setRequiresParsingFix', hadParsingError)
+      // let hadParsingError = false
+      // this.errors.forEach(function (err) {
+      //   if (err.message.startsWith('Parse error')) {
+      //     hadParsingError = true
+      //     this.$store.commit('setDodgyString', newGeojsonString)
+      //   } else if (err.message.startsWith('Polygons and MultiPolygons')) {
+      //     this.$store.commit('setRequiresWindingOrderFix', true)
+      //   }
+      // }, this)
+      // this.$store.commit('setRequiresParsingFix', hadParsingError)
 
-      if (!hadParsingError) {
-        this.$store.commit('setGeoJSON', newGeojsonString)
-      }
-      this.markErrors()
+      // if (!hadParsingError) {
+      //   this.$store.commit('setGeoJSON', newGeojsonString)
+      // }
+      // this.markErrors()
     },
     markErrors () {
       this.errors.forEach(function (err) {

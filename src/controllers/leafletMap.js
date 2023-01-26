@@ -7,7 +7,7 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 import 'leaflet-draw'
 import 'leaflet-draw/dist/leaflet.draw.css'
 
-import store from '../store'
+import { store } from '../store'
 
 // Hack to get the markers into Vue correctly
 delete L.Icon.Default.prototype._getIconUrl
@@ -21,9 +21,11 @@ let drawnItems = null
 let map = null
 
 export function createMap () {
+
+  console.log('createMap')
   map = L.map('map').setView([0, 0], 2)
 
-  const tiles = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
+  L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
     subdomains: 'abcd',
     maxZoom: 19
@@ -56,7 +58,7 @@ export function createMap () {
 
   map.on('click', clickHandlerForMap)
 
-  map.on(L.Draw.Event.DRAWSTART, function (event) {
+  map.on(L.Draw.Event.DRAWSTART, function () {
     map.off('click', clickHandlerForMap)
   })
 
@@ -76,7 +78,7 @@ export function createMap () {
   map.on(L.Draw.Event.DELETED, function () {
     parseGeoJSONAndSendToStore(drawnItems.toGeoJSON())
   })
-
+  console.log('map added')
 }
 
 function clickHandlerForMap () {
