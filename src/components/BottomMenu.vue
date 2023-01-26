@@ -16,17 +16,17 @@
       </Button>
     </Tooltip> -->
 
-    <Button
+    <button
       style="float: left; margin-left: 20px"
       @click="openModal"
     >
       Load from URL
-    </Button>
-    <ButtonGroup>
-      <Button @click="saveToGeojson">
+    </button>
+    <!-- <ButtonGroup> -->
+      <button @click="saveToGeojson">
         Save as geojson
-      </Button>
-      <Dropdown trigger="click" placement="top-end" @on-click="saveInFormats">
+      </button>
+      <!-- <Dropdown trigger="click" placement="top-end" @on-click="saveInFormats">
         <a href="javascript:void(0)">
           <Button icon="md-arrow-dropup" />
         </a>
@@ -36,15 +36,15 @@
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>
-    </ButtonGroup>
-    <Modal
+    </ButtonGroup> -->
+    <!-- <Modal
       v-model="loadDataModal"
       ok-text="Load"
       cancel-text="Cancel"
       @on-ok="loadFromUrl"
     >
       <Input v-model="remoteUrl" placeholder="Url of geojson" style="width: 300px" />
-    </Modal>
+    </Modal> -->
 
 </template>
 

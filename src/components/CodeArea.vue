@@ -1,7 +1,7 @@
 <template>
-    <Button class="copy" icon="md-copy" @click="copy">
+    <button class="copy" icon="md-copy" @click="copy">
       Copy
-    </Button>
+    </button>
     <Codemirror
       ref="myCm"
       :value="code"

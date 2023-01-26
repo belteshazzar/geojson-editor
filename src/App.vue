@@ -17,6 +17,9 @@ export default {
 </script>
 
 <style>
+/*
+https://www.w3schools.com/css/css_grid_item.asp
+*/
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;

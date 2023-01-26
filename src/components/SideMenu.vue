@@ -1,12 +1,10 @@
 <template>
-  <top-menu :loading-github-user="loadingGithubUser" />
   <code-area />
   <bottom-menu />
 </template>
 
 <script>
-import CodeArea from './Code.vue'
-import TopMenu from './TopMenu.vue'
+import CodeArea from './CodeArea.vue'
 import BottomMenu from './BottomMenu.vue'
 
 export default {
@@ -14,10 +12,6 @@ export default {
   components: {
     CodeArea,
     BottomMenu,
-    TopMenu
-  },
-  props: {
-    loadingGithubUser: Boolean
   }
 }
 </script>
