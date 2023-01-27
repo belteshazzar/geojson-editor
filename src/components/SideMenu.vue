@@ -2,9 +2,9 @@
   <div class="sidebar">
     <div class="sidebar-padding">
 
-    <label for="region">Region: </label>
-    <input type="search" class="not-exists" list="regionList" id="region" name="region" v-model="region" />
-    <datalist id="regionList"></datalist>
+    <label for="name">Name: </label>
+    <input type="search" class="not-exists" list="nameList" id="name" name="name" v-model="name" />
+    <datalist id="nameList"></datalist>
 
     <label for="year">Year: </label>
     <input type="search" class="not-exists" list="yearList" id="year" name="year" v-model="year"/>
@@ -19,8 +19,8 @@
     <label for="note">Note: </label>
     <textarea id="note" name="note" rows="10" v-model="note"></textarea>
 
-    <label for="geojson">GeoJSON: </label>
-    <textarea id="geojson" name="geojson" rows="10" disabled v-model="geojson"></textarea>
+    <label for="geometry">Geometry: </label>
+    <textarea id="geometry" name="geometry" rows="10" v-model="geometry"></textarea>
 
     <button id="submit" name="submit" @click="submit">submit</button>
     <button id="reset" name="reset" @click="reset">reset</button>
@@ -30,7 +30,7 @@
 
 <script>
 
-import { store } from '../store'
+// import { store } from '../store'
 
 export default {
   name: 'SideMenu',
@@ -38,44 +38,103 @@ export default {
     fetch('http://localhost:3000/region')
       .then((response) => response.json())
       .then((data) => {
-        const regionList = document.getElementById('regionList')
+        const nameList = document.getElementById('nameList')
         data.regions.forEach(el => {
           const option = document.createElement("option");
           option.value = el
-          regionList.appendChild(option);
+          nameList.appendChild(option);
         });
       });
   },
+  computed: {
+    name: {
+      get () {
+        return this.$store.state.geojson.properties.name
+      },
+      set (value) {
+        this.$store.commit('updateName', value)
+      }
+    },
+    year: {
+      get () {
+        return this.$store.state.geojson.properties.year
+      },
+      set (value) {
+        this.$store.commit('updateYear', value)
+      }
+    },
+    knownAs: {
+      get () {
+        return this.$store.state.geojson.properties.known_as
+      },
+      set (value) {
+        this.$store.commit('updateKnownAs', value)
+      }
+    },
+    source: {
+      get () {
+        return this.$store.state.geojson.properties.source
+      },
+      set (value) {
+        this.$store.commit('updateSource', value)
+      }
+    },
+    note: {
+      get () {
+        return this.$store.state.geojson.properties.note
+      },
+      set (value) {
+        this.$store.commit('updateNote', value)
+      }
+    },
+    labelX: {
+      get () {
+        return this.$store.state.geojson.properties.label_x
+      },
+      set (value) {
+        this.$store.commit('updateLabelX', value)
+      }
+    },
+    labelY: {
+      get () {
+        return this.$store.state.geojson.properties.label_y
+      },
+      set (value) {
+        this.$store.commit('updateLabelY', value)
+      }
+    },
+    geometry: {
+      get () {
+        return JSON.stringify(this.$store.state.geojson.geometry)
+      },
+      set (value) {
+        this.$store.commit('updateGeometry', JSON.parse(value))
+      }
+    }
+  },
   data() {
     return {
-      region: '',
-      regionExists: false,
-      year: '',
+      nameExists: false,
       yearExists: false,
-      knownAs: '',
-      source: '',
-      note: '',
-      geojson: '',
     }
   },
   watch: {
-    action() {
-      document.querySelector('#submit').textContent = this.action
-    },
-    region() {
+    name(newName,oldName) {
 
-      const regions = [...document.querySelectorAll('#regionList option')].map( option => option.value)
+      if (newName.toLowerCase() == oldName.toLowerCase()) {
+        return
+      }
+      const names = [...document.querySelectorAll('#nameList option')].map( option => option.value)
 
-      this.year = ''
       this.yearExists = false
       const yearList = document.getElementById('yearList')
       yearList.replaceChildren()
 
-      if (regions.includes(this.region)) {
-        document.querySelector('#region').classList.remove('not-exists')
-        document.querySelector('#region').classList.add('exists')
+      if (names.includes(this.name)) {
+        document.querySelector('#name').classList.remove('not-exists')
+        document.querySelector('#name').classList.add('exists')
 
-        fetch('http://localhost:3000/region/' + this.region)
+        fetch('http://localhost:3000/region/' + this.name)
           .then((response) => response.json())
           .then((data) => {
             data.years.forEach(el => {
@@ -83,42 +142,47 @@ export default {
               option.value = el
               yearList.appendChild(option);
             });
-            this.regionExists = true
+            this.nameExists = true
           })
           .catch(() => {
-            this.regionExists = false
+            this.nameExists = false
           });
 
       } else {
-        document.querySelector('#region').classList.remove('exists')
-        document.querySelector('#region').classList.add('not-exists')
+        document.querySelector('#name').classList.remove('exists')
+        document.querySelector('#name').classList.add('not-exists')
       }
-
     },
     year() {
 
       const years = [...document.querySelectorAll('#yearList option')].map( option => option.value)
 
-      if (years.includes(this.year)) {
+      if (years.includes(`${this.year}`)) {
         document.querySelector('#year').classList.remove('not-exists')
         document.querySelector('#year').classList.add('exists')
         this.yearExists = true
 
-        if (this.regionExists) {
+        if (this.nameExists) {
 
-          fetch('http://localhost:3000/region/' + this.region + '/' + this.year)
+          fetch('http://localhost:3000/region/' + this.name + '/' + this.year)
             .then((response) => response.json())
             .then((data) => {
-              this.knownAs = data.properties.known_as
-              this.source = data.properties.source
-              this.note = data.properties.note
-              this.geojson = JSON.stringify(data)
+              // this.knownAs = data.properties.known_as
+              // this.source = data.properties.source
+              // this.note = data.properties.note
+              // this.geometry = JSON.stringify(data.geometry)
+              this.$store.commit('updateKnownAs',data.properties.known_as)
+              this.$store.commit('updateSource',data.properties.source)
+              this.$store.commit('updateNote',data.properties.note)
+              this.$store.commit('updateLabelX',data.properties.label_x)
+              this.$store.commit('updateLabelY',data.properties.label_y)
+              this.$store.commit('updateGeometry',data.geometry)
 
-              store.commit('setGeoJSON', data)
+              // store.commit('setGeoJSON', data)
             })
             .catch((reason) => {
               console.log(reason)
-              this.regionExists = false
+              this.nameExists = false
             });
 
         }
@@ -133,17 +197,17 @@ export default {
   },
   methods: {
     submit() {
-      console.log(this)
+      console.log(this.$store)
     },
     reset() {
-      this.region = ''
-      this.regionExists = false
-      this.year = ''
-      this.yearExists = false
-      this.knownAs = ''
-      this.source = ''
-      this.note = ''
-      this.geojson = ''
+      this.$store.commit('updateName','')
+      this.$store.commit('updateYear','')
+      this.$store.commit('updateKnownAs','')
+      this.$store.commit('updateSource','')
+      this.$store.commit('updateNote','')
+      this.$store.commit('updateLabelX',0.0)
+      this.$store.commit('updateLabelY',0.0)
+      this.$store.commit('updateGeometry',null)
     }
   }
 }

@@ -13,11 +13,6 @@ export default {
     Geo,
     SideMenu
   },
-  data() {
-    return {
-      geojson : {}
-    }
-  }
 }
 </script>
 

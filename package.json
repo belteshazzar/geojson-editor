@@ -8,7 +8,10 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@turf/boolean-contains": "^6.5.0",
+    "@turf/difference": "^6.5.0",
     "@turf/flatten": "^6.5.0",
+    "@turf/invariant": "^6.5.0",
     "@turf/random": "^6.5.0",
     "@turf/rewind": "^6.5.0",
     "axios": "^1.2.4",
