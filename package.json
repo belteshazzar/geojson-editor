@@ -13,6 +13,7 @@
     "@turf/rewind": "^6.5.0",
     "axios": "^1.2.4",
     "core-js": "^3.8.3",
+    "cors": "^2.8.5",
     "express": "^4.18.2",
     "file-saver": "^2.0.5",
     "leaflet": "^1.9.3",

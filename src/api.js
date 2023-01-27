@@ -1,5 +1,8 @@
 const express = require('express')
 const app = express()
+app.use(express.json())
+const cors = require('cors');
+app.use(cors())
 const port = 3000
 const fs = require('fs');
 const datadir = 'data'
@@ -22,17 +25,17 @@ function getRegionYears(region) {
     let years = []
 
     fs.readdirSync(datadir + '/' + region, {withFileTypes: true})
-    .filter(item => item.isDirectory())
+    .filter(item => !item.isDirectory())
     .map(item => item.name)
     .forEach(name => {
-        years.push(name)
+        years.push(Number.parseInt(name.replace('.geojson$','').replace(/^.*_/,'')))
     })
 
-    return regions
+    return years
 }
 
 app.get('/', (req, res) => {
-  res.send('Hello World!')
+  res.send('region api')
 })
 
 app.get('/region', (req,res) => {
@@ -58,21 +61,42 @@ app.post('/region/:region', (req,res) => {
 app.get('/region/:region', (req,res) => {
     const region = req.params.region.toLowerCase()
 
-    if (getRegions().includes(region)) {
+    if (!getRegions().includes(region)) {
         res.status(404).send('region doesnt exist')
-    } else {
-        res.json({ region: region, years: getYears(region) })
+        return
     }
+
+    res.json({ region: region, years: getRegionYears(region) })
+
 });
 
 app.get('/region/:region/:year', (req,res) => {
     const region = req.params.region.toLowerCase()
     const year = req.params.year
+
+    const json = JSON.parse(fs.readFileSync(datadir + '/' + region + '/' + region + '_' + year + '.geojson','utf-8'))
+
+    res.json(json);
 });
 
 app.post('/region/:region/:year', (req,res) => {
     const region = req.params.region.toLowerCase()
     const year = req.params.year
+    const geojson = req.body
+
+    console.log(region)
+    console.log(year)
+    console.log(geojson)
+
+    // let outFolder = dirname + '/' + fixedName
+    // if (!fs.existsSync(outFolder)) {
+    //     fs.mkdirSync(outFolder);
+    // }
+
+    // let outFilename = outFolder + '/' + fixedName + '_2022.geojson'
+
+    // fs.writeFileSync(outFilename, JSON.stringify(fixed));
+
 });
 
 app.listen(port, () => {

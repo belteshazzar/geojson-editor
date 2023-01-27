@@ -122,6 +122,7 @@ export function zoomToFeatures () {
 }
 
 export function modifyGeoJSON () {
+  console.log(store)
 
   drawnItems.clearLayers()
   drawnItems.addData(store.getters.geojson)

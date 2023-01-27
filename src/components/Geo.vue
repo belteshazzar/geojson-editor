@@ -1,7 +1,5 @@
 <template>
-  <!-- <div class="mapContainer" :xs="10" :sm="10" :md="14" :lg="14"> -->
-    <div id="map" />
-  <!-- </div> -->
+  <div id="map" />
 </template>
 
 <script>
@@ -11,14 +9,11 @@ export default {
   name: 'LeafletMap',
   mounted () {
     createMap()
-  }
+  },
 }
 </script>
 
 <style>
-.mapContainer {
-  height: 100%;
-}
 #map {
   height: 100%;
   width: 70%;
