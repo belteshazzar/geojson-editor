@@ -1,17 +1,20 @@
 <template>
-    <button class="copy" icon="md-copy" @click="copy">
+  <div class="codeArea">
+    <!--<button class="copy" icon="md-copy" @click="copy">
       Copy
-    </button>
-    <Codemirror
+    </button> -->
+    <textarea :value="code"></textarea>
+    <!-- <Codemirror
       ref="myCm"
       :value="code"
       :options="cmOptions"
       @input="onCmCodeChange"
-    />
+    /> -->
+  </div>
 </template>
 
 <script>
-import { Codemirror } from 'vue-codemirror'
+// import { Codemirror } from 'vue-codemirror'
 // import 'codemirror/lib/codemirror.css'
 // import 'codemirror/theme/base16-light.css'
 // import 'codemirror/addon/selection/active-line.js'
@@ -24,7 +27,7 @@ import { setupCodeMirrorRefs } from '../controllers/codeMirror'
 export default {
   name: 'CodeArea',
   components: {
-    Codemirror
+    // Codemirror
   },
   data () {
     return {
@@ -44,6 +47,7 @@ export default {
   },
   computed: {
     code: function () {
+      console.log("code computed")
       return !this.$store.state.requiresParseFixing ? this.$store.state.geojsonString :this.$store.state.dodgyGeoJsonString
     }
   },
@@ -72,6 +76,8 @@ export default {
       });
     },
     onCmCodeChange: function () {
+
+      console.log('onCmCodeChange')
       this.cleanErrorMarks()
 
       // this.errors = lint.hint(newGeojsonString)
@@ -125,8 +131,17 @@ export default {
 </script>
 
 <style>
-#codeArea {
+.codeArea {
   height: calc(100vh - 100px);
+}
+.codeArea textarea {
+  width: 100%;
+  height: 100%;
+}
+
+.v-codemirror {
+  height: 100%;  
+  position: relative;
 }
 .vue-codemirror, .CodeMirror {
   height: 100%;
@@ -187,7 +202,7 @@ export default {
   opacity: 1;
 }
 
-#codeArea .copy {
+.codeArea .copy {
   position: absolute;
   right: 20px;
   z-index: 800;
