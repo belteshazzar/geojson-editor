@@ -13,11 +13,17 @@
     <label for="known-as">Known As: </label>
     <input type="text" id="known-as" name="known-as" v-model="knownAs"/>
 
+    <label for="label-x">Label Lng: </label>
+    <input type="text" id="label-x" name="label-x" v-model="labelX"/>
+
+    <label for="label-y">Label Lat: </label>
+    <input type="text" id="label-y" name="label-y" v-model="labelY"/>
+
     <label for="source">Source: </label>
     <input type="text" id="source" name="source" v-model="source"/>
 
     <label for="note">Note: </label>
-    <textarea id="note" name="note" rows="10" v-model="note"></textarea>
+    <textarea id="note" name="note" rows="5" v-model="note"></textarea>
 
     <label for="geometry">Geometry: </label>
     <textarea id="geometry" name="geometry" rows="10" v-model="geometry"></textarea>

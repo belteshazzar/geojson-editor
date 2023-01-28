@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import { createMap,modifyGeoJSON } from './../controllers/leafletMap'
+import { createMap,modifyGeoJSON,modifyLabel } from './../controllers/leafletMap'
 
 export default {
   name: 'LeafletMap',
@@ -46,13 +46,13 @@ export default {
   },
   watch: {
     name () {
-      modifyGeoJSON()
+      modifyLabel()
     },
     labelX () {
-      modifyGeoJSON()
+      modifyLabel()
     },
     labelY () {
-      modifyGeoJSON()
+      modifyLabel()
     },
     geometry () {
       modifyGeoJSON()

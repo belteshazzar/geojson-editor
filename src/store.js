@@ -55,6 +55,6 @@ export const store = createStore({
   getters: {
     geojson: function (state) {
       return state.geojson;
-    },
+    }
   }
 })
