@@ -1,3 +1,4 @@
+
 const express = require('express')
 const app = express()
 app.use(express.json())
@@ -6,7 +7,6 @@ app.use(cors())
 const port = 3000
 const fs = require('fs');
 const datadir = 'data'
-
 
 function getRegions() {
     let regions = []
@@ -79,26 +79,50 @@ app.get('/region/:region/:year', (req,res) => {
     res.json(json);
 });
 
-app.post('/region/:region/:year', (req,res) => {
+app.put('/region/:region/:year', (req,res) => {
     const region = req.params.region.toLowerCase()
     const year = req.params.year
     const geojson = req.body
 
-    console.log(region)
-    console.log(year)
-    console.log(geojson)
+    if (region.toLowerCase() != geojson.properties.name) {
+        res.status(400).send('region doesnt match payload')
+        return
+    }
 
-    // let outFolder = dirname + '/' + fixedName
-    // if (!fs.existsSync(outFolder)) {
-    //     fs.mkdirSync(outFolder);
-    // }
+    if (Number.parseInt(year) + '' != year) {
+        res.status(400).send('year must be an integer')
+        return
+    }
 
-    // let outFilename = outFolder + '/' + fixedName + '_2022.geojson'
+    if (year != geojson.properties.year) {
+        res.status(400).send('year doesnt match payload')
+        return
+    }
 
-    // fs.writeFileSync(outFilename, JSON.stringify(fixed));
+    let regionFolder = datadir + '/' + region
+    if (!fs.existsSync(regionFolder)) {
+        fs.mkdirSync(regionFolder);
+    }
 
+    let outFilename = regionFolder + '/' + region + '_' + year + '.geojson'
+    if (fs.existsSync(outFilename)) {
+        fs.writeFileSync(outFilename, JSON.stringify(geojson));
+
+        res
+        .status(201) // created
+        .json(geojson)
+
+    } else {
+
+        fs.writeFileSync(outFilename, JSON.stringify(geojson));
+
+        res
+        .status(200) // updated
+        .json(geojson)
+
+    }
 });
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`region api on port ${port}`)
 })

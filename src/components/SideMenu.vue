@@ -202,8 +202,29 @@ export default {
     }
   },
   methods: {
-    submit() {
-      console.log(this.$store)
+    async submit() {
+
+      const geojson = this.$store.getters.geojson
+
+      await fetch(`http://localhost:3000/region/${geojson.properties.name}/${geojson.properties.year}`,{
+        method: 'PUT',
+        mode: 'cors', // no-cors, *cors, same-origin
+        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: 'omit', // include, *same-origin, omit
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        redirect: 'error',
+        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body: JSON.stringify(geojson) 
+      })
+
+      .then((data) => {
+        alert('Success:', data);
+      })
+      .catch((error) => {
+        alert('Error:', error);
+      });
     },
     reset() {
       this.$store.commit('updateName','')

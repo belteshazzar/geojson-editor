@@ -8,11 +8,6 @@ import 'leaflet-draw'
 import 'leaflet-draw/dist/leaflet.draw.css'
 
 import { store } from '../store'
-// import difference from '@turf/difference'
-// import combine from '@turf/combine'
-// import {getGeom} from '@turf/invariant'
-// import booleanContains from '@turf/boolean-contains'
-// import booleanContains from '@turf/boolean-contains'
 
 // Hack to get the markers into Vue correctly
 delete L.Icon.Default.prototype._getIconUrl
@@ -22,15 +17,14 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow
 })
 
-// let drawnItems = null
 let map = null
-var editableLayers = null
+let drawnItems = null
 var label = null
 
 export function createMap () {
 
   console.log('createMap')
-  map = L.map('map').setView([0, 0], 2)
+  map = L.map('map',{editable:true}).setView([0, 0], 2)
 
   L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
@@ -38,16 +32,13 @@ export function createMap () {
     maxZoom: 19
   }).addTo(map)
 
-  // drawnItems = L.geoJSON(null, {
-  //   style: function () {
-  //     return {
-  //       color: '#666C79'
-  //     }
-  //   }
-  // }).addTo(map)
-
-  editableLayers = new L.FeatureGroup();
-  map.addLayer(editableLayers);
+  drawnItems = L.geoJSON(null, {
+    style: function () {
+      return {
+        color: '#666C79'
+      }
+    }
+  }).addTo(map)
 
   label = new L.Marker([0.0,0.0],{
     draggable: true
@@ -57,7 +48,7 @@ export function createMap () {
   map.addControl(new L.Control.Draw({
     position: 'topright',
     edit: {
-      featureGroup: editableLayers,//drawnItems,
+      featureGroup: drawnItems,
       poly: {
         allowIntersection: false
       }
@@ -75,116 +66,108 @@ export function createMap () {
   }))
 
   map.on('draw:created', function (e) {
-    console.log('-- draw:created -----------')
-    // let geojson;
-    // let geom;
-    console.log(e)
     const newLayer = e.layer;
     const newGeoJSON = newLayer.toGeoJSON()
-    const newGeom = newGeoJSON.geometry//getGeom(newGeoJSON);
 
-    if (editableLayers.getLayers().length > 2) {
-      console.error('more than one existing layer')
-    }
+    if (drawnItems.getLayers().length == 0) {
 
-    const existingLayer = editableLayers.getLayers()[0]
-    if (existingLayer != null) {
+      store.commit('updateGeometry', newGeoJSON.geometry)
 
-      let existingGeoJSON = existingLayer.toGeoJSON()
-      if (existingGeoJSON.type == 'FeatureCollection') {
-        console.log('feature collection => feature')
-
-        if (existingGeoJSON.features.length == 0) {
-          store.commit('updateGeometry', newGeom)
-          return
-        } else if (existingGeoJSON.features.length != 1) {
-          console.error('more than one feature',existingGeoJSON)
-          return
-        }
-        existingGeoJSON = existingGeoJSON.features[0]
-      }
-
-      const existingGeom = existingGeoJSON.geometry // getGeom(existingGeoJSON)
-
-
-      // combine into multi polygon
-
-      if (existingGeom.type == 'Polygon') {
-  
-        let geojson = {
-          type: 'Feature',
-          properties: {},
-          geometry: {
-            type: 'MultiPolygon',
-            coordinates: [
-              existingGeom.coordinates,
-              newGeom.coordinates
-            ]
-          }
-        }
-        // editableLayers.removeLayer(existingLayer)
-        // editableLayers.addLayer(L.geoJSON(geojson))
-        store.commit('updateGeometry', geojson.geometry)
-
-      } else if (existingGeom.type == 'MultiPolygon') {
-
-        let geojson = {
-          type: 'Feature',
-          properties: {},
-          geometry: {
-            type: 'MultiPolygon',
-            coordinates: existingGeom.coordinates
-          }
-        }
-        geojson.geometry.coordinates.push(newGeom.coordinates)
-
-        // editableLayers.removeLayer(existingLayer)
-        // editableLayers.addLayer(L.geoJSON(geojson))
-        store.commit('updateGeometry', geojson.geometry)
-
-      } else {
-        console.error('unknown existing geom type: ' + existingGeom.type)
-      }
+    } else if (drawnItems.getLayers().length != 1) {
+      console.error('there should be onw layer')
+      return
+      
     } else {
 
-      // editableLayers.addLayer(L.geoJSON(newGeoJSON));
-      store.commit('updateGeometry', newGeom)
+      const geom = {
+        type: 'MultiPolygon',
+        coordinates: []
+      }
+
+      drawnItems.getLayers().forEach((layer) => {
+        const geojson = layer.toGeoJSON()
+        if (geojson.geometry.type == 'Polygon') {
+          geom.coordinates.push(geojson.geometry.coordinates)
+        } else if (geojson.geometry.type == 'MultiPolygon') {
+
+          geojson.geometry.coordinates.forEach((coords) => {
+            geom.coordinates.push(coords)
+          })
+
+        } else {
+          console.error('expected layer to be Polygon or MultiPolygon but was: ' + geojson.geometry.type)
+          return
+        }
+      })
+
+      geom.coordinates.push(newGeoJSON.geometry.coordinates)
+
+      store.commit('updateGeometry', geom)
 
     }
-  
-    // editableLayers.eachLayer(function (layer) {
-    //   geojson = layer.toGeoJSON();
-    //   if (geojson.type == 'FeatureCollection') {
-    //     geojson = geojson.features[0];
-    //   }
-    //   geom = getGeom(geojson);
-
-    //   if (booleanContains(geom, newGeom)) {
-    //     newGeom = difference(geom, newGeom);
-    //     newLayer = L.geoJSON(newGeom);
-    //     editableLayers.removeLayer(layer);
-    //   }
-    // });
-
-    // editableLayers.eachLayer(function (layer) {
-    //   console.log('existing layer',layer.toGeoJSON())
-    //   console.log('new layer',newGeom)
-    //   console.log('existing',layer.toGeoJSON().geometry)
-    //   newGeom = combine(layer.toGeoJSON(),newLayer)
-    //   console.log('new geom',newGeom)
-    //   if (newGeom.type == 'FeatureCollection') {
-    //     console.log('feature collection')
-    //     newGeom = newGeom.features[0]
-    //   }
-    //   newLayer = L.geoJSON(newGeom)
-    //   editableLayers.removeLayer(layer);
-    // })
-    // console.log(newLayer.toGeoJSON())
-
-    
 
   });
 
+  function convertToPolygons() {
+    drawnItems.clearLayers();
+    const geojson = store.getters.geojson
+
+    if (geojson.geometry.type == 'Polygon') {
+      drawnItems.addData(geojson)
+    } else if (geojson.geometry.type == 'MultiPolygon') {
+
+      geojson.geometry.coordinates.forEach((coords) => {
+        drawnItems.addData({
+          type : 'Feature',
+          properties: {},
+          geometry: {
+            type: 'Polygon',
+            coordinates: coords
+          }
+        })
+      })
+    } else {
+      console.error('only polygon and multipolygon supported')
+      return
+    }
+  }
+
+  function convertToMultiPolygons() {
+
+    if (drawnItems.getLayers().length == 0) {
+
+      store.commit('updateGeometry', null)
+
+    } else if (drawnItems.getLayers().length == 1) {
+
+      // assuming its a polygon
+      store.commit('updateGeometry',drawnItems.getLayers()[0].toGeoJSON().geometry)
+
+    } else {
+
+      let geometry = {
+        type: 'MultiPolygon',
+        coordinates: []
+      }
+
+      drawnItems.getLayers().forEach((layer) => {
+        geometry.coordinates.push(layer.toGeoJSON().geometry.coordinates)
+      })
+
+      store.commit('updateGeometry',geometry)
+    }
+
+  }
+
+  // MultiPolygon editing doesn't work
+  // so convert to polygons
+  map.on(L.Draw.Event.EDITSTART, convertToPolygons)
+  map.on(L.Draw.Event.DELETESTART, convertToPolygons)
+
+  // MultiPolygon editing doesn't work
+  // so convert to polygons and back on stop
+  map.on(L.Draw.Event.EDITSTOP, convertToMultiPolygons)
+  map.on(L.Draw.Event.DELETESTOP, convertToMultiPolygons)
 
   // map.on('click', clickHandlerForMap)
 
@@ -201,10 +184,10 @@ export function createMap () {
   //   parseGeoJSONAndSendToStore(editableLayers.toGeoJSON())
   // })
 
-  map.on(L.Draw.Event.EDITED, function () {
-    console.log("edited")
-    parseGeoJSONAndSendToStore(editableLayers.toGeoJSON())
-  })
+  // map.on(L.Draw.Event.EDITED, function () {
+  //   console.log("edited")
+  //   parseGeoJSONAndSendToStore(editableLayers.toGeoJSON())
+  // })
 
   label.on('drag',function() {
     console.log('drag')
@@ -213,72 +196,38 @@ export function createMap () {
     store.commit('updateLabelY',label.getLatLng().lat)
   })
 
-  map.on(L.Draw.Event.DELETED, function () {
-    console.log("deleted")
-    parseGeoJSONAndSendToStore(editableLayers.toGeoJSON())
-  })
-  console.log('map added')
+  // map.on(L.Draw.Event.DELETED, function () {
+  //   console.log("deleted")
+  //   parseGeoJSONAndSendToStore(editableLayers.toGeoJSON())
+  // })
+
 }
 
-// function clickHandlerForMap () {
-//   store.commit('setSelectedProperties', {
-//     properties: null
-//   })
-//   resetStyleOfPreviousSelection()
-//   lastSelectedFeature = null
+// function parseGeoJSONAndSendToStore (geojson) {
+//   console.log('parseGeoJSONAndSendToStore',geojson)
+//   store.commit('updateGeometry', geojson.geometry)
 // }
 
-
-function parseGeoJSONAndSendToStore (geojson) {
-  console.log('parseGeoJSONAndSendToStore',geojson)
-  store.commit('updateGeometry', geojson.geometry)
-}
-
-// let lastSelectedFeature = null
-
-// function highlightSelectedFeature () {
-//   lastSelectedFeature.setStyle({
-//     color: '#fedc7f'
-//   })
+// export function zoomToFeatures () {
+//    map.fitBounds(editableLayers.getBounds())
 // }
-
-// function resetStyleOfPreviousSelection () {
-//   if (lastSelectedFeature === null) return
-//   lastSelectedFeature.setStyle({
-//     color: '#666C79'
-//   })
-// }
-
-// function openPopup(e) {
-//   L.DomEvent.stop(e);
-//   resetStyleOfPreviousSelection()
-//   lastSelectedFeature = e.target
-//   highlightSelectedFeature()
-// //  store.commit('setSelectedProperties', lastSelectedFeature.feature)
-// }
-
-export function zoomToFeatures () {
-   map.fitBounds(editableLayers.getBounds())
-}
 
 export function modifyLabel() {
   const geojson = store.getters.geojson
-  const name = geojson.properties.name
+  // const name = geojson.properties.name
   const lng = geojson.properties.label_x
   const lat = geojson.properties.label_y
-  console.log(name,lat,lng)
-  label.setLatLng([lat,lng])
-  
+  label.setLatLng([lat,lng])  
 }
 
 export function modifyGeoJSON () {
-  console.log('modifyGeoJSON',store)
+  drawnItems.clearLayers();
+  const geojson = store.getters.geojson
 
-  editableLayers.clearLayers()
-  let newLayer = L.geoJSON(store.getters.geojson);
-  editableLayers.addLayer(newLayer);
-  // editableLayers.addData(store.getters.geojson)
-  // editableLayers.eachLayer(function (layer) {
-  //   layer.on('click', openPopup)
-  // })
+  if (geojson.type != 'Feature') {
+    console.error('only geojson features supported')
+    return
+  }
+
+  drawnItems.addData(geojson)
 }
