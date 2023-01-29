@@ -38,6 +38,32 @@ app.get('/', (req, res) => {
   res.send('region api')
 })
 
+app.get('/regions', (req,res) => {
+    let all = {}
+
+    fs.readdirSync(datadir, {withFileTypes: true})
+        .filter(item => item.isDirectory())
+        .map(item => item.name)
+        .forEach(region => {
+
+            all[region] = {}
+
+            fs.readdirSync(datadir + '/' + region, {withFileTypes: true})
+                .filter(item => !item.isDirectory())
+                .map(item => item.name)
+                .forEach(filename => {
+
+                    const year = filename.replace(/\.geojson$/,'').replace(/^.*_/,'')
+                    const json = JSON.parse(fs.readFileSync(datadir + '/' + region + '/' + filename,'utf-8'))
+
+                    all[region][year] = json
+
+                })
+        })
+
+    res.json(all)
+})
+
 app.get('/region', (req,res) => {
     res.json({ regions: getRegions() })
 })
