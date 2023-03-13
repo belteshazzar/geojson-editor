@@ -1,9 +1,3 @@
-//import Vuex from 'vuex'
-//import Vue from 'vue'
-// import { modifyGeoJSON } from './controllers/leafletMap'
-//import { highlightSelectedFeatureInCodeArea } from './controllers/codeMirror'
-
-//Vue.use(Vuex)
 
 import { createStore } from 'vuex'
 
@@ -14,9 +8,9 @@ const BLANK_GEOJSON = {
     year: '',
     known_as: '',
     source: '',
+    overlay: { url: '', c1: { lat: 0.0, lng: 0.0 }, c2: { lat: 0.0, lng: 0.0 }},
     note: '',
-    label_x: 0.0,
-    label_y: 0.0,
+    label: { lat: 0.0, lng: 0.0 },
   },
   geometry: null
 };
@@ -38,19 +32,37 @@ export const store = createStore({
     updateSource(state,_source) {
       state.geojson.properties.source = _source
     },
+    updateOverlayUrl(state,_url) {
+      state.geojson.properties.overlay.url = _url
+    },
+    updateOverlayC1Lat(state,_lat) {
+      state.geojson.properties.overlay.c1.lat = _lat
+    },
+    updateOverlayC1Lng(state,_lng) {
+      state.geojson.properties.overlay.c1.lng = _lng
+    },
+    updateOverlayC2Lat(state,_lat) {
+      state.geojson.properties.overlay.c2.lat = _lat
+    },
+    updateOverlayC2Lng(state,_lng) {
+      state.geojson.properties.overlay.c2.lng = _lng
+    },
     updateNote(state,_note) {
       state.geojson.properties.note = _note
     },
-    updateLabelX(state,_label_x) {
-      state.geojson.properties.label_x = _label_x
+    updateLabelLat(state,_lat) {
+      state.geojson.properties.label.lat = _lat
     },
-    updateLabelY(state,_label_y) {
-      state.geojson.properties.label_y = _label_y
+    updateLabelLng(state,_lng) {
+      state.geojson.properties.label.lng = _lng
     },
     updateGeometry(state,_geometry) {
-      console.log('update geometry',_geometry)
       state.geojson.geometry = _geometry
     },
+  },
+  actions: {
+    loadOverlay: function() {
+    }
   },
   getters: {
     geojson: function (state) {

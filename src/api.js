@@ -6,7 +6,7 @@ const cors = require('cors');
 app.use(cors())
 const port = 3000
 const fs = require('fs');
-const datadir = 'data'
+const datadir = 'data/regions'
 
 function getRegions() {
     let regions = []
@@ -147,6 +147,14 @@ app.put('/region/:region/:year', (req,res) => {
         .json(geojson)
 
     }
+});
+
+app.get('/river/:river', (req,res) => {
+    const river = req.params.river.toLowerCase()
+
+    const json = JSON.parse(fs.readFileSync('data/rivers/' + river + '.geojson','utf-8'))
+
+    res.json(json);
 });
 
 app.listen(port, () => {

@@ -2,34 +2,73 @@
   <div class="sidebar">
     <div class="sidebar-padding">
 
-    <label for="name">Name: </label>
-    <input type="search" class="not-exists" list="nameList" id="name" name="name" v-model="name" />
-    <datalist id="nameList"></datalist>
+    <div class="sidebar-half">
+      <label for="name">Name: </label>
+      <input type="search" class="not-exists" list="nameList" id="name" name="name" v-model="name" />
+      <datalist id="nameList"></datalist>
+    </div>
 
-    <label for="year">Year: </label>
-    <input type="search" class="not-exists" list="yearList" id="year" name="year" v-model="year"/>
-    <datalist id="yearList"></datalist>
+    <div class="sidebar-half">
+      <label for="year">Year: </label>
+      <input type="search" class="not-exists" list="yearList" id="year" name="year" v-model="year"/>
+      <datalist id="yearList"></datalist>
+    </div>
 
     <label for="known-as">Known As: </label>
     <input type="text" id="known-as" name="known-as" v-model="knownAs"/>
 
-    <label for="label-x">Label Lng: </label>
-    <input type="text" id="label-x" name="label-x" v-model="labelX"/>
+    <div class="sidebar-half">
+      <label for="label-lat">Label Lat: </label>
+      <input type="text" id="label-lat" name="label-lat" v-model="labelLat"/>
+    </div>
 
-    <label for="label-y">Label Lat: </label>
-    <input type="text" id="label-y" name="label-y" v-model="labelY"/>
+    <div class="sidebar-half">
+      <label for="label-lng">Label Lng: </label>
+      <input type="text" id="label-lng" name="label-lng" v-model="labelLng"/>
+    </div>
 
     <label for="source">Source: </label>
     <input type="text" id="source" name="source" v-model="source"/>
 
-    <label for="note">Note: </label>
-    <textarea id="note" name="note" rows="5" v-model="note"></textarea>
+    <div class="sidebar-half">
+      <label for="overlayUrl">Overlay: </label>
+      <input type="text" id="overlayUrl" name="overlayUrl" v-model="overlayUrl"/>
+    </div>
+    <div class="sidebar-half">
+      <button id="loadOverlay" name="loadOverlay" @click="loadOverlay">load overlay</button>
+    </div>
+    <div class="sidebar-half">
+      <label for="overlayC1Lat">C1 Lat: </label>
+      <input type="text" id="overlayC1Lat" name="overlayC1Lat" v-model="overlayC1Lat"/>
+    </div>
+    <div class="sidebar-half">
+      <label for="overlayC1Lng">C1 Lng: </label>
+      <input type="text" id="overlayC1Lng" name="overlayC1Lng" v-model="overlayC1Lng"/>
+    </div>
+    <div class="sidebar-half">
+      <label for="overlayC2Lat">C2 Lat: </label>
+      <input type="text" id="overlayC2Lat" name="overlayC2Lat" v-model="overlayC2Lat"/>
+    </div>
+    <div class="sidebar-half">
+      <label for="overlayC2Lng">C2 Lng: </label>
+      <input type="text" id="overlayC2Lng" name="overlayC2Lng" v-model="overlayC2Lng"/>
+    </div>
+
+    <div class="sidebar-full">
+      <label for="note">Note: </label>
+      <textarea id="note" name="note" rows="5" v-model="note"></textarea>
+    </div>
 
     <label for="geometry">Geometry: </label>
-    <textarea id="geometry" name="geometry" rows="10" v-model="geometry"></textarea>
+    <textarea id="geometry" name="geometry" rows="5" v-model="geometry"></textarea>
 
-    <button id="submit" name="submit" @click="submit">submit</button>
-    <button id="reset" name="reset" @click="reset">reset</button>
+
+    <div class="sidebar-half">
+      <button id="submit" name="submit" @click="submit">submit</button>
+    </div>
+    <div class="sidebar-half">
+      <button id="reset" name="reset" @click="reset">reset</button>
+    </div>
   </div>
 </div>
 </template>
@@ -85,6 +124,46 @@ export default {
         this.$store.commit('updateSource', value)
       }
     },
+    overlayUrl: {
+      get () {
+        return this.$store.state.geojson.properties.overlay.url
+      },
+      set (value) {
+        this.$store.commit('updateOverlayUrl', value)
+      }
+    },
+    overlayC1Lat: {
+      get () {
+        return this.$store.state.geojson.properties.overlay.c1.lat
+      },
+      set (value) {
+        this.$store.commit('updateOverlayC1Lat', value)
+      }
+    },
+    overlayC1Lng: {
+      get () {
+        return this.$store.state.geojson.properties.overlay.c1.lng
+      },
+      set (value) {
+        this.$store.commit('updateOverlayC1Lng', value)
+      }
+    },
+    overlayC2Lat: {
+      get () {
+        return this.$store.state.geojson.properties.overlay.c2.lat
+      },
+      set (value) {
+        this.$store.commit('updateOverlayC2Lat', value)
+      }
+    },
+    overlayC2Lng: {
+      get () {
+        return this.$store.state.geojson.properties.overlay.c2.lng
+      },
+      set (value) {
+        this.$store.commit('updateOverlayC2Lng', value)
+      }
+    },
     note: {
       get () {
         return this.$store.state.geojson.properties.note
@@ -93,20 +172,20 @@ export default {
         this.$store.commit('updateNote', value)
       }
     },
-    labelX: {
+    labelLat: {
       get () {
-        return this.$store.state.geojson.properties.label_x
+        return this.$store.state.geojson.properties.label.lat
       },
       set (value) {
-        this.$store.commit('updateLabelX', value)
+        this.$store.commit('updateLabelLat', value)
       }
     },
-    labelY: {
+    labelLng: {
       get () {
-        return this.$store.state.geojson.properties.label_y
+        return this.$store.state.geojson.properties.label.lng
       },
       set (value) {
-        this.$store.commit('updateLabelY', value)
+        this.$store.commit('updateLabelLng', value)
       }
     },
     geometry: {
@@ -179,9 +258,14 @@ export default {
               // this.geometry = JSON.stringify(data.geometry)
               this.$store.commit('updateKnownAs',data.properties.known_as)
               this.$store.commit('updateSource',data.properties.source)
+              this.$store.commit('updateOverlayUrl',data.properties.overlay.url)
+              this.$store.commit('updateOverlayC1Lat',data.properties.overlay.c1.lat)
+              this.$store.commit('updateOverlayC1Lng',data.properties.overlay.c1.lng)
+              this.$store.commit('updateOverlayC2Lat',data.properties.overlay.c2.lat)
+              this.$store.commit('updateOverlayC2Lng',data.properties.overlay.c2.lng)
               this.$store.commit('updateNote',data.properties.note)
-              this.$store.commit('updateLabelX',data.properties.label_x)
-              this.$store.commit('updateLabelY',data.properties.label_y)
+              this.$store.commit('updateLabelLat',data.properties.label.lat)
+              this.$store.commit('updateLabelLng',data.properties.label.lng)
               this.$store.commit('updateGeometry',data.geometry)
 
               // store.commit('setGeoJSON', data)
@@ -202,6 +286,9 @@ export default {
     }
   },
   methods: {
+    loadOverlay() {
+      this.$store.dispatch('loadOverlay',this.source)
+    },
     async submit() {
 
       const geojson = this.$store.getters.geojson
@@ -231,9 +318,14 @@ export default {
       this.$store.commit('updateYear','')
       this.$store.commit('updateKnownAs','')
       this.$store.commit('updateSource','')
+      this.$store.commit('updateOverlayUrl','')
+      this.$store.commit('updateOverlayC1Lat',0.0)
+      this.$store.commit('updateOverlayC1Lng',0.0)
+      this.$store.commit('updateOverlayC2Lat',0.0)
+      this.$store.commit('updateOverlayC2Lng',0.0)
       this.$store.commit('updateNote','')
-      this.$store.commit('updateLabelX',0.0)
-      this.$store.commit('updateLabelY',0.0)
+      this.$store.commit('updateLabelLat',0.0)
+      this.$store.commit('updateLabelLng',0.0)
       this.$store.commit('updateGeometry',null)
     }
   }
@@ -250,6 +342,16 @@ export default {
 
 .sidebar-padding {
   padding: 10px;
+}
+
+.sidebar-full {
+  width: 100%;
+  left: 0px;
+}
+
+.sidebar-half {
+  width: 50%;
+  float: left;
 }
 
 .exists {

@@ -3,12 +3,12 @@
 </template>
 
 <script>
-import { createMap,modifyGeoJSON,modifyLabel } from './../controllers/leafletMap'
+import { createMap,modifyGeoJSON,modifyLabel,modifyOverlay } from './../controllers/leafletMap'
 
 export default {
   name: 'LeafletMap',
   mounted () {
-    createMap()
+    createMap(this.$store)
   },
   computed: {
     name: {
@@ -19,20 +19,52 @@ export default {
         this.$store.commit('updateName', value)
       }
     },
-    labelX: {
+    labelLat: {
       get () {
-        return this.$store.state.geojson.properties.label_x
+        return this.$store.state.geojson.properties.label.lat
       },
       set (value) {
-        this.$store.commit('updateLabelX', value)
+        this.$store.commit('updateLabelLat', value)
       }
     },
-    labelY: {
+    labelLng: {
       get () {
-        return this.$store.state.geojson.properties.label_y
+        return this.$store.state.geojson.properties.label.lng
       },
       set (value) {
-        this.$store.commit('updateLabelY', value)
+        this.$store.commit('updateLabelLng', value)
+      }
+    },
+    overlayC1Lat: {
+      get () {
+        return this.$store.state.geojson.properties.overlay.c1.lat
+      },
+      set (value) {
+        this.$store.commit('updateOverlayC1Lat', value)
+      }
+    },
+    overlayC1Lng: {
+      get () {
+        return this.$store.state.geojson.properties.overlay.c1.lng
+      },
+      set (value) {
+        this.$store.commit('updateOverlayC1Lng', value)
+      }
+    },
+    overlayC2Lat: {
+      get () {
+        return this.$store.state.geojson.properties.overlay.c2.lat
+      },
+      set (value) {
+        this.$store.commit('updateOverlayC2Lat', value)
+      }
+    },
+    overlayC2Lng: {
+      get () {
+        return this.$store.state.geojson.properties.overlay.c2.lng
+      },
+      set (value) {
+        this.$store.commit('updateOverlayC2Lng', value)
       }
     },
     geometry: {
@@ -48,11 +80,23 @@ export default {
     name () {
       modifyLabel()
     },
-    labelX () {
+    labelLat () {
       modifyLabel()
     },
-    labelY () {
+    labelLng () {
       modifyLabel()
+    },
+    overlayC1Lat () {
+      modifyOverlay()
+    },
+    overlayC1Lng () {
+      modifyOverlay()
+    },
+    overlayC2Lat () {
+      modifyOverlay()
+    },
+    overlayC2Lng () {
+      modifyOverlay()
     },
     geometry () {
       modifyGeoJSON()
