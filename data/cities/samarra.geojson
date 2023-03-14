@@ -1,0 +1,12 @@
+{
+    "type": "Feature",
+    "properties": {
+        "name": "Samarra"
+    },
+    "geometry": {
+      "coordinates": [
+        34.198333, 43.874167
+      ],
+    "type": "Point"
+  }
+}

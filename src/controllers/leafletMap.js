@@ -30,17 +30,6 @@ var bounds = null
 var m1 = null
 var m2 = null
 
-const cities = {
-  samarra: {lat: 34.198333, lng: 43.874167},
-  kish: {lat: 32.540278, lng: 44.604722},
-  adab: {lat: 31.946944, lng: 45.968889},
-  umma: {lat: 31.667222, lng: 45.8875},
-  uruk: {lat: 31.324167, lng: 45.637222},
-  lagash: {lat: 31.411389, lng: 46.407222},
-  larsa: {lat: 31.285833, lng: 45.853611 },
-  ur: {lat: 30.961653, lng: 46.105126 }
-}
-
 export function createMap (store) {
 
   store.subscribeAction((action) => {
@@ -125,13 +114,13 @@ export function createMap (store) {
    })
   label.addTo(map)
 
-  for (let c in cities) {
-    new L.Marker([cities[c].lat,cities[c].lng],{
-     }).bindTooltip(c, {
-         permanent: true, 
-         direction: 'right'
-     }).addTo(map)
-  }
+  // for (let c in cities) {
+  //   new L.Marker([cities[c].lat,cities[c].lng],{
+  //    }).bindTooltip(c, {
+  //        permanent: true, 
+  //        direction: 'right'
+  //    }).addTo(map)
+  // }
 
   for (let river of ['tigris','euphrates','nile']) {
 
