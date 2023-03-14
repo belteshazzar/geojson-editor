@@ -1,15 +1,24 @@
 <template>
   <Geo />
-  <SideMenu />
+  <Tabs>
+    <Tab name="Region"><SideMenu /></Tab>
+    <Tab name="City">Tab 2</Tab>
+    <Tab name="River">Tab 3</Tab>
+  </Tabs>
 </template>
 
 <script>
+
+import Tab from '../components/Tab.vue'
+import Tabs from '../components/Tabs.vue'
 import Geo from '../components/Geo.vue'
 import SideMenu from '../components/SideMenu.vue'
 
 export default {
   name: 'App',
   components: {
+    Tab,
+    Tabs,
     Geo,
     SideMenu
   },
