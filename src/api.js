@@ -1,3 +1,4 @@
+const util = require('util')
 
 const express = require('express')
 const app = express()
@@ -110,7 +111,7 @@ app.put('/region/:region/:year', (req,res) => {
     const year = req.params.year
     const geojson = req.body
 
-    if (region.toLowerCase() != geojson.properties.name) {
+    if (region != geojson.properties.name.toLowerCase()) {
         res.status(400).send('region doesnt match payload')
         return
     }
@@ -195,7 +196,7 @@ app.put('/river/:river', (req,res) => {
     const river = req.params.river.toLowerCase()
     const geojson = req.body
 
-    if (river.toLowerCase() != geojson.properties.name) {
+    if (river != geojson.properties.name.toLowerCase()) {
         res.status(400).send('river doesnt match payload')
         return
     }
@@ -205,7 +206,7 @@ app.put('/river/:river', (req,res) => {
         fs.writeFileSync(outFilename, JSON.stringify(geojson));
 
         res
-        .status(201) // created
+        .status(200) // updated
         .json(geojson)
 
     } else {
@@ -213,7 +214,7 @@ app.put('/river/:river', (req,res) => {
         fs.writeFileSync(outFilename, JSON.stringify(geojson));
 
         res
-        .status(200) // updated
+        .status(201) // created
         .json(geojson)
 
     }
@@ -260,20 +261,22 @@ app.get('/city/:city', (req,res) => {
 });
 
 app.put('/city/:city', (req,res) => {
+
     const city = req.params.city.toLowerCase()
     const geojson = req.body
 
-    if (city.toLowerCase() != geojson.properties.name) {
+    if (city != geojson.properties.name.toLowerCase()) {
         res.status(400).send('city doesnt match payload')
         return
     }
 
     let outFilename = 'data/cities/' + city + '.geojson'
+
     if (fs.existsSync(outFilename)) {
         fs.writeFileSync(outFilename, JSON.stringify(geojson));
 
         res
-        .status(201) // created
+        .status(200) // updated
         .json(geojson)
 
     } else {
@@ -281,11 +284,37 @@ app.put('/city/:city', (req,res) => {
         fs.writeFileSync(outFilename, JSON.stringify(geojson));
 
         res
-        .status(200) // updated
+        .status(201) // created
         .json(geojson)
 
     }
 });
+
+app.get('/city/:city/wiki', (req,res) => {
+
+    const city = req.params.city
+
+    fetch(`https://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&titles=${city}&rvslots=main`)
+        .then((response) => response.json())
+        .then((json) => {
+
+            const id = Object.keys(json.query.pages)
+            const txt = json.query.pages[id].revisions[0].slots.main['*']
+
+            const coordinates = /\|coordinates = [^\n]*/.exec(txt)[0]
+            const cm = /{{coord\|([^|]+)\|(N|S)\|([^|]+)\|(E|W)/.exec(coordinates)
+            const lat = Number.parseFloat(cm[1]) * ( cm[2] == 'N' ? 1 : -1 )
+            const lng = Number.parseFloat(cm[3]) * ( cm[4] == 'E' ? 1 : -1 )
+            const built = /\|built = [^\n]*/.exec(txt)[0]
+            const bm = /{{(.*?)}}/.exec(built)
+            const founded = bm[1]
+            const abandoned = /\|abandoned = [^\n]*/.exec(txt)[0]
+            const am = /{{(.*?)}}/.exec(abandoned)
+            const ab = am[0]
+
+            res.json({ lat: lat, lng: lng, founded: founded, abandoned: ab })
+        })
+})
 
 app.listen(port, () => {
   console.log(`region api on port ${port}`)

@@ -12,6 +12,8 @@
     <label for="cityLng">Longitude: </label>
     <input type="text" id="cityLng" name="cityLng" v-model="cityLng"/>
 
+    <!-- https://en.wikipedia.org/w/api.php?action=query&prop=coordinates&titles=Babylon -->
+
     <label for="cityFounded">Founded: </label>
     <input type="text" id="cityFounded" name="cityFounded" v-model="cityFounded"/>
 
@@ -44,7 +46,6 @@ export default {
     fetch('http://localhost:3000/city')
       .then((response) => response.json())
       .then((data) => {
-        console.log(data)
         const cityList = document.getElementById('cityList')
         data.cities.forEach(el => {
           const option = document.createElement("option");
@@ -141,7 +142,21 @@ export default {
         alert('Error:', error);
       });
     },
-    reset() {
+    async reset() {
+
+      await fetch(`https://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&titles=Babylon&rvslots=main`)
+      .then((data) => {
+        console.log(data)
+      })
+      
+      this.cityExists = false
+      this.cityName = ''
+      this.cityLat = ''
+      this.cityLng = ''
+      this.cityFounded = ''
+      this.cityAbandoned = ''
+      this.citySource = ''
+      this.cityNote = ''
     }
   }
 }
