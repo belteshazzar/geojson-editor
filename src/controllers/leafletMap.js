@@ -122,17 +122,41 @@ export function createMap (store) {
   //    }).addTo(map)
   // }
 
-  for (let river of ['tigris','euphrates','nile']) {
+  fetch('http://localhost:3000/city')
+    .then((response) => response.json())
+    .then((data) => {
 
-    fetch('http://localhost:3000/river/' + river)
-      .then((response) => response.json())
-      .then((data) => {
-        L.geoJSON(data).addTo(map);
+      data.cities.forEach(city => {
+        fetch('http://localhost:3000/city/' + city)
+        .then((response) => response.json())
+        .then((data) => {
+          new L.Marker(data.geometry.coordinates,{
+            }).bindTooltip(data.properties.name, {
+                permanent: true, 
+                direction: 'right'
+            }).addTo(map)
+        })
+        .catch(() => {
+          console.error('failed to load city: ' + city);
+        });  
       })
-      .catch(() => {
-        console.error('failed to load river: ' + river);
-      });
-  }
+  })
+
+  fetch('http://localhost:3000/river')
+    .then((response) => response.json())
+    .then((data) => {
+
+      data.rivers.forEach(river => {
+        fetch('http://localhost:3000/river/' + river)
+        .then((response) => response.json())
+        .then((data) => {
+          L.geoJSON(data).addTo(map);
+        })
+        .catch(() => {
+          console.error('failed to load river: ' + river);
+        });  
+      })
+  })
 
   map.addControl(new L.Control.Draw({
     position: 'topright',

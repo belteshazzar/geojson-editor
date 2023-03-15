@@ -1,9 +1,9 @@
 <template>
   <Geo />
   <Tabs>
-    <Tab name="Region"><SideMenu /></Tab>
-    <Tab name="City">Tab 2</Tab>
-    <Tab name="River">Tab 3</Tab>
+    <Tab name="Region"><RegionEdit /></Tab>
+    <Tab name="City"><CityEdit /></Tab>
+    <Tab name="River"><RiverEdit /></Tab>
   </Tabs>
 </template>
 
@@ -12,7 +12,9 @@
 import Tab from '../components/Tab.vue'
 import Tabs from '../components/Tabs.vue'
 import Geo from '../components/Geo.vue'
-import SideMenu from '../components/SideMenu.vue'
+import RegionEdit from '../components/RegionEdit.vue'
+import RiverEdit from '../components/RiverEdit.vue'
+import CityEdit from '../components/CityEdit.vue'
 
 export default {
   name: 'App',
@@ -20,7 +22,9 @@ export default {
     Tab,
     Tabs,
     Geo,
-    SideMenu
+    RegionEdit,
+    RiverEdit,
+    CityEdit
   },
 }
 </script>

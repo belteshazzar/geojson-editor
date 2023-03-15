@@ -149,12 +149,142 @@ app.put('/region/:region/:year', (req,res) => {
     }
 });
 
+app.get('/rivers', (req,res) => {
+    let all = {}
+
+    fs.readdirSync('data/rivers', {withFileTypes: true})
+        .filter(item => !item.isDirectory())
+        .filter(item => item.name.match(/.*\.geojson$/))
+        .map(item => item.name)
+        .forEach(filename => {
+            const river = filename.replace(/\.geojson$/,'')
+            const json = JSON.parse(fs.readFileSync('data/rivers/' + filename,'utf-8'))
+            all[river] = json
+        })
+
+    res.json(all)
+})
+
+app.get('/river', (req,res) => {
+
+    function getRivers() {
+        let rivers = []
+    
+        fs.readdirSync('data/rivers', {withFileTypes: true})
+        .filter(item => !item.isDirectory())
+        .map(item => item.name)
+        .forEach(name => {
+            rivers.push(name.replace(/\.geojson$/,''))
+        })
+    
+        return rivers
+    }
+
+    res.json({ rivers: getRivers() })
+})
+
 app.get('/river/:river', (req,res) => {
     const river = req.params.river.toLowerCase()
 
     const json = JSON.parse(fs.readFileSync('data/rivers/' + river + '.geojson','utf-8'))
 
     res.json(json);
+});
+
+app.put('/river/:river', (req,res) => {
+    const river = req.params.river.toLowerCase()
+    const geojson = req.body
+
+    if (river.toLowerCase() != geojson.properties.name) {
+        res.status(400).send('river doesnt match payload')
+        return
+    }
+
+    let outFilename = 'data/rivers/' + river + '.geojson'
+    if (fs.existsSync(outFilename)) {
+        fs.writeFileSync(outFilename, JSON.stringify(geojson));
+
+        res
+        .status(201) // created
+        .json(geojson)
+
+    } else {
+
+        fs.writeFileSync(outFilename, JSON.stringify(geojson));
+
+        res
+        .status(200) // updated
+        .json(geojson)
+
+    }
+});
+
+app.get('/cities', (req,res) => {
+    let all = {}
+
+    fs.readdirSync('data/cities', {withFileTypes: true})
+        .filter(item => !item.isDirectory())
+        .filter(item => item.name.match(/.*\.geojson$/))
+        .map(item => item.name)
+        .forEach(filename => {
+            const city = filename.replace(/\.geojson$/,'')
+            const json = JSON.parse(fs.readFileSync('data/cities/' + filename,'utf-8'))
+            all[city] = json
+        })
+
+    res.json(all)
+})
+
+app.get('/city', (req,res) => {
+
+    function getCities() {
+        let cities = []
+    
+        fs.readdirSync('data/cities', {withFileTypes: true})
+        .filter(item => !item.isDirectory())
+        .map(item => item.name)
+        .forEach(name => {
+            cities.push(name.replace(/\.geojson$/,''))
+        })
+    
+        return cities
+    }
+
+    res.json({ cities: getCities() })
+})
+
+app.get('/city/:city', (req,res) => {
+    const city = req.params.city.toLowerCase()
+    const json = JSON.parse(fs.readFileSync('data/cities/' + city + '.geojson','utf-8'))
+    res.json(json);
+});
+
+app.put('/city/:city', (req,res) => {
+    const city = req.params.city.toLowerCase()
+    const geojson = req.body
+
+    if (city.toLowerCase() != geojson.properties.name) {
+        res.status(400).send('city doesnt match payload')
+        return
+    }
+
+    let outFilename = 'data/cities/' + city + '.geojson'
+    if (fs.existsSync(outFilename)) {
+        fs.writeFileSync(outFilename, JSON.stringify(geojson));
+
+        res
+        .status(201) // created
+        .json(geojson)
+
+    } else {
+
+        fs.writeFileSync(outFilename, JSON.stringify(geojson));
+
+        res
+        .status(200) // updated
+        .json(geojson)
+
+    }
 });
 
 app.listen(port, () => {
