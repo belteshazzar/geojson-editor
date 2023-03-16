@@ -113,14 +113,12 @@ export function createMap (store) {
     draggable: true
    })
   label.addTo(map)
-
-  // for (let c in cities) {
-  //   new L.Marker([cities[c].lat,cities[c].lng],{
-  //    }).bindTooltip(c, {
-  //        permanent: true, 
-  //        direction: 'right'
-  //    }).addTo(map)
-  // }
+  try {
+    console.log(label)
+   label._icon.classList.add("huechange")
+   } catch (e) {
+    console.log(e)
+   }
 
   fetch('http://localhost:3000/city')
     .then((response) => response.json())
@@ -132,9 +130,11 @@ export function createMap (store) {
         .then((data) => {
           new L.Marker(data.geometry.coordinates,{
             }).bindTooltip(data.properties.name, {
-                permanent: true, 
+                // permanent: true, 
                 direction: 'right'
-            }).addTo(map)
+            }).addTo(map).on('click',() => {
+              console.log(data)
+            })
         })
         .catch(() => {
           console.error('failed to load city: ' + city);
@@ -303,8 +303,6 @@ export function createMap (store) {
   // })
 
   label.on('drag',function() {
-    console.log('drag')
-    console.log(label.getLatLng())
     store.commit('updateLabelLat',label.getLatLng().lng)
     store.commit('updateLabelLng',label.getLatLng().lat)
   })

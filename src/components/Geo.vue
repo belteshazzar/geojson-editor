@@ -112,4 +112,6 @@ export default {
   float: left;
 }
 
+img.huechange { filter: hue-rotate(120deg); }
+
 </style>

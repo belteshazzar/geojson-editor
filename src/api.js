@@ -256,8 +256,13 @@ app.get('/city', (req,res) => {
 
 app.get('/city/:city', (req,res) => {
     const city = req.params.city.toLowerCase()
-    const json = JSON.parse(fs.readFileSync('data/cities/' + city + '.geojson','utf-8'))
-    res.json(json);
+    const filename = 'data/cities/' + city + '.geojson'
+    if (fs.existsSync(filename)) {
+        const json = JSON.parse(fs.readFileSync(filename,'utf-8'))
+        res.json(json);
+    } else {
+        res.status(404).json({$err: 'not found'})
+    }
 });
 
 app.put('/city/:city', (req,res) => {
@@ -290,30 +295,70 @@ app.put('/city/:city', (req,res) => {
     }
 });
 
-app.get('/city/:city/wiki', (req,res) => {
+app.get('/city/:city/wiki', async (req,res) => {
 
     const city = req.params.city
 
-    fetch(`https://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&titles=${city}&rvslots=main`)
-        .then((response) => response.json())
-        .then((json) => {
+    const both = await Promise.all([
+        fetch(`https://en.wikipedia.org/w/api.php?format=json&action=query&prop=coordinates&titles=${city}`)
+            .then((response) => response.json())
+            .then((json) => {
+                try {
+                    const id = Object.keys(json.query.pages)[0]
+                    const coordinates = json.query.pages[id].coordinates[0]
+                    const lat = coordinates.lat
+                    const lng = coordinates.lon
+                    return { lat: lat, lng: lng }
+                } catch (e) {
+                    return { lat: '', lng: '' }
+                }
+            }),
 
-            const id = Object.keys(json.query.pages)
-            const txt = json.query.pages[id].revisions[0].slots.main['*']
+        fetch(`https://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&titles=${city}&rvslots=main`)
+            .then((response) => response.json())
+            .then((json) => {
+                const re = /\|[^ ]+ = {{(circa)?\|(AD )?([0-9]+)( BC)?(\|.*)?}}/
 
-            const coordinates = /\|coordinates = [^\n]*/.exec(txt)[0]
-            const cm = /{{coord\|([^|]+)\|(N|S)\|([^|]+)\|(E|W)/.exec(coordinates)
-            const lat = Number.parseFloat(cm[1]) * ( cm[2] == 'N' ? 1 : -1 )
-            const lng = Number.parseFloat(cm[3]) * ( cm[4] == 'E' ? 1 : -1 )
-            const built = /\|built = [^\n]*/.exec(txt)[0]
-            const bm = /{{(.*?)}}/.exec(built)
-            const founded = bm[1]
-            const abandoned = /\|abandoned = [^\n]*/.exec(txt)[0]
-            const am = /{{(.*?)}}/.exec(abandoned)
-            const ab = am[0]
+                try {
+                    const id = Object.keys(json.query.pages)
+                    const txt = json.query.pages[id].revisions[0].slots.main['*']
 
-            res.json({ lat: lat, lng: lng, founded: founded, abandoned: ab })
-        })
+                    let founded = ''
+                    let fline = /\|built = [^\n]*/.exec(txt)
+                    if (fline) {
+                        fline = fline[0]
+                        const fmatch = re.exec(fline)
+                        if (fmatch) {
+                            if (fmatch[2]) founded = fmatch[3]
+                            if (fmatch && fmatch[4]) founded = -fmatch[3]
+                        }
+                    } else {
+
+                        let est = /\| established_date += ([0-9]+)( BC)?[^\n]*/.exec(txt)
+                        if (est) {
+                            founded = ( est[2] ? -1 : 1 ) * est[1]
+                        }
+
+                    }
+
+                    let abandoned = ''
+                    let aline = /\|abandoned = [^\n]*/.exec(txt)
+                    if (aline) {
+                        aline = aline[0]
+                        const amatch = re.exec(aline)
+                        if (amatch) {
+                            if (amatch[2]) abandoned = amatch[3]
+                            if (amatch && amatch[4]) abandoned = -amatch[3]
+                        }
+                    }
+
+                    return { founded: founded, abandoned: abandoned }
+                } catch (e) {
+                    return { founded: '', abandoned: '' }
+                }
+            })
+        ])
+    res.json({ lat: both[0].lat, lng: both[0].lng, founded: both[1].founded, abandoned: both[1].abandoned })
 })
 
 app.listen(port, () => {

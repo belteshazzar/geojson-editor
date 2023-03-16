@@ -6,6 +6,8 @@
     <input type="search" class="not-exists" list="cityList" id="cityName" name="cityName" v-model="cityName" />
     <datalist id="cityList"></datalist>
 
+    <button id="cityWiki" name="cityWiki" @click="wiki">from wikipedia</button>
+
     <label for="cityLat">Latitude: </label>
     <input type="text" id="cityLat" name="cityLat" v-model="cityLat"/>
 
@@ -22,6 +24,7 @@
 
     <label for="citySource">Source: </label>
     <input type="text" id="citySource" name="citySource" v-model="citySource"/>
+    <button id="cityGo" name="cityGo" @click="goto">goto wikipedia</button>
 
     <label for="cityNote">Note: </label>
     <textarea id="cityNote" name="cityNote" rows="5" v-model="cityNote"></textarea>
@@ -103,6 +106,22 @@ export default {
     }
   },
   methods: {
+    goto() {
+      window.open(this.citySource, '_blank').focus();
+    },
+    async wiki() {
+
+      await fetch(`http://localhost:3000/city/${this.cityName}/wiki`)
+        .then((data) => data.json())
+        .then((json) => {
+          this.cityFounded = json.founded
+          this.cityAbandoned = json.abandoned
+          this.cityLat = json.lat
+          this.cityLng = json.lng
+          this.citySource = `https://en.wikipedia.org/wiki/${this.cityName}`
+        })
+
+    },
     async submit() {
 
       const geojson = {
@@ -143,11 +162,6 @@ export default {
       });
     },
     async reset() {
-
-      await fetch(`https://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&titles=Babylon&rvslots=main`)
-      .then((data) => {
-        console.log(data)
-      })
       
       this.cityExists = false
       this.cityName = ''
