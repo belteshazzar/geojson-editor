@@ -46,7 +46,7 @@
 export default {
   name: 'SideMenu',
   mounted() {
-    fetch('http://localhost:3000/city')
+    fetch('http://localhost:3000/cityNames')
       .then((response) => response.json())
       .then((data) => {
         const cityList = document.getElementById('cityList')
@@ -83,7 +83,7 @@ export default {
         document.querySelector('#cityName').classList.remove('not-exists')
         document.querySelector('#cityName').classList.add('exists')
 
-        fetch('http://localhost:3000/city/' + newName)
+        fetch('http://localhost:3000/cities/' + newName)
             .then((response) => response.json())
             .then((data) => {
               this.cityName = data.properties.name
@@ -111,7 +111,7 @@ export default {
     },
     async wiki() {
 
-      await fetch(`http://localhost:3000/city/${this.cityName}/wiki`)
+      await fetch(`http://localhost:3000/cities/${this.cityName}/wiki`)
         .then((data) => data.json())
         .then((json) => {
           this.cityFounded = json.founded
@@ -141,7 +141,7 @@ export default {
         }
       }
 
-      await fetch(`http://localhost:3000/city/${this.cityName.toLowerCase()}`,{
+      await fetch(`http://localhost:3000/cities/${this.cityName.toLowerCase()}`,{
         method: 'PUT',
         mode: 'cors', // no-cors, *cors, same-origin
         cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached

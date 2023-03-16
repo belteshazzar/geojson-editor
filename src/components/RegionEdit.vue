@@ -80,7 +80,7 @@
 export default {
   name: 'SideMenu',
   mounted() {
-    fetch('http://localhost:3000/region')
+    fetch('http://localhost:3000/regionNames')
       .then((response) => response.json())
       .then((data) => {
         const nameList = document.getElementById('nameList')
@@ -219,7 +219,7 @@ export default {
         document.querySelector('#name').classList.remove('not-exists')
         document.querySelector('#name').classList.add('exists')
 
-        fetch('http://localhost:3000/region/' + this.name)
+        fetch('http://localhost:3000/regions/' + this.name)
           .then((response) => response.json())
           .then((data) => {
             data.years.forEach(el => {
@@ -249,7 +249,7 @@ export default {
 
         if (this.nameExists) {
 
-          fetch('http://localhost:3000/region/' + this.name + '/' + this.year)
+          fetch('http://localhost:3000/regions/' + this.name + '/' + this.year)
             .then((response) => response.json())
             .then((data) => {
               // this.knownAs = data.properties.known_as
@@ -293,7 +293,7 @@ export default {
 
       const geojson = this.$store.getters.geojson
 
-      await fetch(`http://localhost:3000/region/${geojson.properties.name}/${geojson.properties.year}`,{
+      await fetch(`http://localhost:3000/regions/${geojson.properties.name}/${geojson.properties.year}`,{
         method: 'PUT',
         mode: 'cors', // no-cors, *cors, same-origin
         cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached

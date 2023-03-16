@@ -9,7 +9,7 @@ const port = 3000
 const fs = require('fs');
 const datadir = 'data/regions'
 
-function getRegions() {
+function getRegionNames() {
     let regions = []
 
     fs.readdirSync(datadir, {withFileTypes: true})
@@ -65,11 +65,11 @@ app.get('/regions', (req,res) => {
     res.json(all)
 })
 
-app.get('/region', (req,res) => {
-    res.json({ regions: getRegions() })
+app.get('/regionNames', (req,res) => {
+    res.json({ regions: getRegionNames() })
 })
 
-app.post('/region/:region', (req,res) => {
+app.post('/regions/:region', (req,res) => {
 
     const region = req.params.region.toLowerCase()
 
@@ -85,7 +85,7 @@ app.post('/region/:region', (req,res) => {
 
 })
 
-app.get('/region/:region', (req,res) => {
+app.get('/regions/:region', (req,res) => {
     const region = req.params.region.toLowerCase()
 
     if (!getRegions().includes(region)) {
@@ -97,7 +97,7 @@ app.get('/region/:region', (req,res) => {
 
 });
 
-app.get('/region/:region/:year', (req,res) => {
+app.get('/regions/:region/:year', (req,res) => {
     const region = req.params.region.toLowerCase()
     const year = req.params.year
 
@@ -106,7 +106,7 @@ app.get('/region/:region/:year', (req,res) => {
     res.json(json);
 });
 
-app.put('/region/:region/:year', (req,res) => {
+app.put('/regions/:region/:year', (req,res) => {
     const region = req.params.region.toLowerCase()
     const year = req.params.year
     const geojson = req.body
@@ -166,9 +166,9 @@ app.get('/rivers', (req,res) => {
     res.json(all)
 })
 
-app.get('/river', (req,res) => {
+app.get('/riverNames', (req,res) => {
 
-    function getRivers() {
+    function getRiverNames() {
         let rivers = []
     
         fs.readdirSync('data/rivers', {withFileTypes: true})
@@ -181,10 +181,10 @@ app.get('/river', (req,res) => {
         return rivers
     }
 
-    res.json({ rivers: getRivers() })
+    res.json({ rivers: getRiverNames() })
 })
 
-app.get('/river/:river', (req,res) => {
+app.get('/rivers/:river', (req,res) => {
     const river = req.params.river.toLowerCase()
 
     const json = JSON.parse(fs.readFileSync('data/rivers/' + river + '.geojson','utf-8'))
@@ -192,7 +192,7 @@ app.get('/river/:river', (req,res) => {
     res.json(json);
 });
 
-app.put('/river/:river', (req,res) => {
+app.put('/rivers/:river', (req,res) => {
     const river = req.params.river.toLowerCase()
     const geojson = req.body
 
@@ -236,9 +236,9 @@ app.get('/cities', (req,res) => {
     res.json(all)
 })
 
-app.get('/city', (req,res) => {
+app.get('/cityNames', (req,res) => {
 
-    function getCities() {
+    function getCityNames() {
         let cities = []
     
         fs.readdirSync('data/cities', {withFileTypes: true})
@@ -251,10 +251,10 @@ app.get('/city', (req,res) => {
         return cities
     }
 
-    res.json({ cities: getCities() })
+    res.json({ cities: getCityNames() })
 })
 
-app.get('/city/:city', (req,res) => {
+app.get('/cities/:city', (req,res) => {
     const city = req.params.city.toLowerCase()
     const filename = 'data/cities/' + city + '.geojson'
     if (fs.existsSync(filename)) {
@@ -265,7 +265,7 @@ app.get('/city/:city', (req,res) => {
     }
 });
 
-app.put('/city/:city', (req,res) => {
+app.put('/cities/:city', (req,res) => {
 
     const city = req.params.city.toLowerCase()
     const geojson = req.body
@@ -295,7 +295,7 @@ app.put('/city/:city', (req,res) => {
     }
 });
 
-app.get('/city/:city/wiki', async (req,res) => {
+app.get('/cities/:city/wiki', async (req,res) => {
 
     const city = req.params.city
 

@@ -120,42 +120,28 @@ export function createMap (store) {
     console.log(e)
    }
 
-  fetch('http://localhost:3000/city')
+  fetch('http://localhost:3000/cities')
     .then((response) => response.json())
     .then((data) => {
 
-      data.cities.forEach(city => {
-        fetch('http://localhost:3000/city/' + city)
-        .then((response) => response.json())
-        .then((data) => {
-          new L.Marker(data.geometry.coordinates,{
-            }).bindTooltip(data.properties.name, {
+      for (var c in data) {
+          new L.Marker(data[c].geometry.coordinates,{
+            }).bindTooltip(data[c].properties.name, {
                 // permanent: true, 
                 direction: 'right'
             }).addTo(map).on('click',() => {
-              console.log(data)
+              console.log(data[c])
             })
-        })
-        .catch(() => {
-          console.error('failed to load city: ' + city);
-        });  
-      })
+      }
   })
 
-  fetch('http://localhost:3000/river')
+  fetch('http://localhost:3000/rivers')
     .then((response) => response.json())
     .then((data) => {
 
-      data.rivers.forEach(river => {
-        fetch('http://localhost:3000/river/' + river)
-        .then((response) => response.json())
-        .then((data) => {
-          L.geoJSON(data).addTo(map);
-        })
-        .catch(() => {
-          console.error('failed to load river: ' + river);
-        });  
-      })
+      for (var r in data) {
+          L.geoJSON(data[r]).addTo(map);
+      }
   })
 
   map.addControl(new L.Control.Draw({
