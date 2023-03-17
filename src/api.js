@@ -73,7 +73,7 @@ app.post('/regions/:region', (req,res) => {
 
     const region = req.params.region.toLowerCase()
 
-    if (getRegions().includes(region)) {
+    if (getRegionNames().includes(region)) {
         res.status(400).send('already exists')
     } else {
         const newDir = datadir + '/' + region
@@ -88,7 +88,7 @@ app.post('/regions/:region', (req,res) => {
 app.get('/regions/:region', (req,res) => {
     const region = req.params.region.toLowerCase()
 
-    if (!getRegions().includes(region)) {
+    if (!getRegionNames().includes(region)) {
         res.status(404).send('region doesnt exist')
         return
     }

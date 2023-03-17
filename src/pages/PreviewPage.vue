@@ -72,6 +72,10 @@ export default {
                     }
                   }
                 })
+                .bindTooltip(feature.properties.name, {
+                  // permanent: true, 
+                  direction: 'right'
+                })
                 layer.addTo(map)
                 layers.push({year: feature.properties.year, layer: layer})
 

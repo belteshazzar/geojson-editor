@@ -32,6 +32,9 @@ var m2 = null
 
 export function createMap (store) {
 
+  // sumer source: https://en.wikipedia.org/wiki/Lugal-zage-si
+  // sumer image: https://upload.wikimedia.org/wikipedia/commons/d/dd/Sumer_%28map%29.jpg
+
   store.subscribeAction((action) => {
     if (action.type == 'loadOverlay') {
       console.log('load overlay from: ' + action.payload)
@@ -41,11 +44,11 @@ export function createMap (store) {
         map.removeLayer(m1)
         map.removeLayer(m2)
       }
-      // const imageUrl = action.payload
-      const imageUrl = 'https://upload.wikimedia.org/wikipedia/commons/9/9d/Umma2350.PNG'
+      const imageUrl = action.payload
+    //   const imageUrl = 'https://upload.wikimedia.org/wikipedia/commons/9/9d/Umma2350.PNG'
 
 
-      corner1 = L.latLng(30.282788098216884, 43.34659087188286)
+     corner1 = L.latLng(30.282788098216884, 43.34659087188286)
      corner2 = L.latLng(33.64663552343716, 49.081378775823396)
      bounds = L.latLngBounds(corner1, corner2)
 
@@ -77,12 +80,12 @@ export function createMap (store) {
      })
      m2.addTo(map);
 
-     map.fitBounds(bounds);
-     overlay = new L.ImageOverlay(imageUrl, bounds, {
-        opacity: 0.7,
-        interactive: true
-     });
-     map.addLayer(overlay);
+      map.fitBounds(bounds);
+      overlay = new L.ImageOverlay(imageUrl, bounds, {
+          opacity: 0.7,
+          interactive: true
+      });
+      map.addLayer(overlay);
     
      store.commit('updateOverlayC1Lat',corner1.lat)
      store.commit('updateOverlayC1Lng',corner1.lng)
@@ -113,12 +116,8 @@ export function createMap (store) {
     draggable: true
    })
   label.addTo(map)
-  try {
-    console.log(label)
-   label._icon.classList.add("huechange")
-   } catch (e) {
-    console.log(e)
-   }
+
+  label._icon.classList.add("huechange")
 
   fetch('http://localhost:3000/cities')
     .then((response) => response.json())
@@ -334,11 +333,19 @@ export function loadOverlay() {
 }
 
 export function modifyOverlay() {
-  const data = store.getters.geojson.properties.overlay
-  corner1.lat = data.c1.lat
-  corner1.lng = data.c1.lng
-  corner2.lat = data.c2.lat
-  corner2.lng = data.c2.lng
-  bounds = L.latLngBounds(corner1,corner2)
-  overlay.setBounds(bounds)
+  console.log('modifyOverlay')
+  // if (store.getters.geojson.properties.overlay) {
+  //   const data = store.getters.geojson.properties.overlay
+
+  //   console.log(data)
+
+  //   if (data.c1 && data.c2) {
+  //     corner1.lat = data.c1.lat
+  //     corner1.lng = data.c1.lng
+  //     corner2.lat = data.c2.lat
+  //     corner2.lng = data.c2.lng
+  //     bounds = L.latLngBounds(corner1,corner2)
+  //     overlay.setBounds(bounds)
+  //   }
+  // }
 }

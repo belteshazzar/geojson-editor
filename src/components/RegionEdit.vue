@@ -258,14 +258,27 @@ export default {
               // this.geometry = JSON.stringify(data.geometry)
               this.$store.commit('updateKnownAs',data.properties.known_as)
               this.$store.commit('updateSource',data.properties.source)
-              this.$store.commit('updateOverlayUrl',data.properties.overlay.url)
-              this.$store.commit('updateOverlayC1Lat',data.properties.overlay.c1.lat)
-              this.$store.commit('updateOverlayC1Lng',data.properties.overlay.c1.lng)
-              this.$store.commit('updateOverlayC2Lat',data.properties.overlay.c2.lat)
-              this.$store.commit('updateOverlayC2Lng',data.properties.overlay.c2.lng)
+              if (data.properties.overlay) {
+                this.$store.commit('updateOverlayUrl',data.properties.overlay.url)
+                this.$store.commit('updateOverlayC1Lat',data.properties.overlay.c1.lat)
+                this.$store.commit('updateOverlayC1Lng',data.properties.overlay.c1.lng)
+                this.$store.commit('updateOverlayC2Lat',data.properties.overlay.c2.lat)
+                this.$store.commit('updateOverlayC2Lng',data.properties.overlay.c2.lng)
+              } else {
+                this.$store.commit('updateOverlayUrl','')
+                this.$store.commit('updateOverlayC1Lat','')
+                this.$store.commit('updateOverlayC1Lng','')
+                this.$store.commit('updateOverlayC2Lat','')
+                this.$store.commit('updateOverlayC2Lng','')
+              }
               this.$store.commit('updateNote',data.properties.note)
+              if (data.properties.label) {
               this.$store.commit('updateLabelLat',data.properties.label.lat)
               this.$store.commit('updateLabelLng',data.properties.label.lng)
+              } else {
+                this.$store.commit('updateLabelLat','')
+                this.$store.commit('updateLabelLng','')
+              }
               this.$store.commit('updateGeometry',data.geometry)
 
               // store.commit('setGeoJSON', data)
@@ -287,7 +300,7 @@ export default {
   },
   methods: {
     loadOverlay() {
-      this.$store.dispatch('loadOverlay',this.source)
+      this.$store.dispatch('loadOverlay',this.overlayUrl)
     },
     async submit() {
 

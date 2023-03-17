@@ -24,7 +24,7 @@
 
     <label for="citySource">Source: </label>
     <input type="text" id="citySource" name="citySource" v-model="citySource"/>
-    <button id="cityGo" name="cityGo" @click="goto">goto wikipedia</button>
+    <button id="cityGo" name="cityGo" @click="goto">goto source</button>
 
     <label for="cityNote">Note: </label>
     <textarea id="cityNote" name="cityNote" rows="5" v-model="cityNote"></textarea>
