@@ -121,7 +121,7 @@ app.put('/regions/:region/:year', (req,res) => {
         return
     }
 
-    if (year != geojson.properties.year) {
+    if (year != geojson.properties.year.from) {
         res.status(400).send('year doesnt match payload')
         return
     }

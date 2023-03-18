@@ -268,6 +268,7 @@ export default {
               // this.source = data.properties.source
               // this.note = data.properties.note
               // this.geometry = JSON.stringify(data.geometry)
+              this.$store.commit('updateYearTo',data.properties.year.to)
               this.$store.commit('updateKnownAs',data.properties.known_as)
               this.$store.commit('updateSource',data.properties.source)
               if (data.properties.overlay) {
@@ -318,7 +319,7 @@ export default {
 
       const geojson = this.$store.getters.geojson
 
-      await fetch(`http://localhost:3000/regions/${geojson.properties.name}/${geojson.properties.yearFrom}`,{
+      await fetch(`http://localhost:3000/regions/${geojson.properties.name}/${geojson.properties.year.from}`,{
         method: 'PUT',
         mode: 'cors', // no-cors, *cors, same-origin
         cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
