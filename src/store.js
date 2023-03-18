@@ -5,7 +5,7 @@ const BLANK_GEOJSON = {
   type: 'Feature',
   properties: {
     name: '',
-    year: '',
+    year: { from : '', to: '' },
     known_as: '',
     source: '',
     overlay: { url: '', c1: { lat: 0.0, lng: 0.0 }, c2: { lat: 0.0, lng: 0.0 }},
@@ -23,8 +23,11 @@ export const store = createStore({
     updateName(state,_name) {
       state.geojson.properties.name = _name
     },
-    updateYear(state,_year) {
-      state.geojson.properties.year = _year
+    updateYearFrom(state,_year) {
+      state.geojson.properties.year.from = _year
+    },
+    updateYearTo(state,_year) {
+      state.geojson.properties.year.to = _year
     },
     updateKnownAs(state,_known_as) {
       state.geojson.properties.known_as = _known_as

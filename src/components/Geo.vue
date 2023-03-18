@@ -113,5 +113,6 @@ export default {
 }
 
 img.huechange { filter: hue-rotate(120deg); }
+img.huechange2 { filter: hue-rotate(240deg); }
 
 </style>

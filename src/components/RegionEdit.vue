@@ -7,21 +7,25 @@
       <input type="search" class="not-exists" list="nameList" id="name" name="name" v-model="name" />
       <datalist id="nameList"></datalist>
     </div>
-
     <div class="sidebar-half">
-      <label for="year">Year: </label>
-      <input type="search" class="not-exists" list="yearList" id="year" name="year" v-model="year"/>
+      <label for="yearFrom">Year From: </label>
+      <input type="search" class="not-exists" list="yearList" id="yearFrom" name="yearFrom" v-model="yearFrom"/>
       <datalist id="yearList"></datalist>
     </div>
 
-    <label for="known-as">Known As: </label>
-    <input type="text" id="known-as" name="known-as" v-model="knownAs"/>
+    <div class="sidebar-half">
+      <label for="known-as">Known As: </label>
+      <input type="text" id="known-as" name="known-as" v-model="knownAs"/>
+    </div>
+    <div class="sidebar-half">
+      <label for="yearTo">Year To: </label>
+      <input type="text" id="yearTo" name="yearTo" v-model="yearTo"/>
+    </div>
 
     <div class="sidebar-half">
       <label for="label-lat">Label Lat: </label>
       <input type="text" id="label-lat" name="label-lat" v-model="labelLat"/>
     </div>
-
     <div class="sidebar-half">
       <label for="label-lng">Label Lng: </label>
       <input type="text" id="label-lng" name="label-lng" v-model="labelLng"/>
@@ -100,12 +104,20 @@ export default {
         this.$store.commit('updateName', value)
       }
     },
-    year: {
+    yearFrom: {
       get () {
-        return this.$store.state.geojson.properties.year
+        return this.$store.state.geojson.properties.year.from
       },
       set (value) {
-        this.$store.commit('updateYear', value)
+        this.$store.commit('updateYearFrom', value)
+      }
+    },
+    yearTo: {
+      get () {
+        return this.$store.state.geojson.properties.year.to
+      },
+      set (value) {
+        this.$store.commit('updateYearTo', value)
       }
     },
     knownAs: {
@@ -238,18 +250,18 @@ export default {
         document.querySelector('#name').classList.add('not-exists')
       }
     },
-    year() {
+    yearFrom() {
 
       const years = [...document.querySelectorAll('#yearList option')].map( option => option.value)
 
-      if (years.includes(`${this.year}`)) {
-        document.querySelector('#year').classList.remove('not-exists')
-        document.querySelector('#year').classList.add('exists')
+      if (years.includes(`${this.yearFrom}`)) {
+        document.querySelector('#yearFrom').classList.remove('not-exists')
+        document.querySelector('#yearFrom').classList.add('exists')
         this.yearExists = true
 
         if (this.nameExists) {
 
-          fetch('http://localhost:3000/regions/' + this.name + '/' + this.year)
+          fetch('http://localhost:3000/regions/' + this.name + '/' + this.yearFrom)
             .then((response) => response.json())
             .then((data) => {
               // this.knownAs = data.properties.known_as
@@ -291,8 +303,8 @@ export default {
         }
 
       } else {
-        document.querySelector('#year').classList.remove('exists')
-        document.querySelector('#year').classList.add('not-exists')
+        document.querySelector('#yearFrom').classList.remove('exists')
+        document.querySelector('#yearFrom').classList.add('not-exists')
         this.yearExists = false
       }
 
@@ -306,7 +318,7 @@ export default {
 
       const geojson = this.$store.getters.geojson
 
-      await fetch(`http://localhost:3000/regions/${geojson.properties.name}/${geojson.properties.year}`,{
+      await fetch(`http://localhost:3000/regions/${geojson.properties.name}/${geojson.properties.yearFrom}`,{
         method: 'PUT',
         mode: 'cors', // no-cors, *cors, same-origin
         cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
@@ -328,7 +340,8 @@ export default {
     },
     reset() {
       this.$store.commit('updateName','')
-      this.$store.commit('updateYear','')
+      this.$store.commit('updateYearFrom','')
+      this.$store.commit('updateYearTo','')
       this.$store.commit('updateKnownAs','')
       this.$store.commit('updateSource','')
       this.$store.commit('updateOverlayUrl','')

@@ -48,9 +48,15 @@ export function createMap (store) {
     //   const imageUrl = 'https://upload.wikimedia.org/wikipedia/commons/9/9d/Umma2350.PNG'
 
 
-     corner1 = L.latLng(30.282788098216884, 43.34659087188286)
-     corner2 = L.latLng(33.64663552343716, 49.081378775823396)
-     bounds = L.latLngBounds(corner1, corner2)
+    // https://en.wikipedia.org/wiki/Kingdom_of_Kush
+    // https://upload.wikimedia.org/wikipedia/commons/0/07/Kushite_heartland_and_Kushite_Empire_of_the_25th_dynasty_circa_700_BCE.jpg
+
+    bounds = map.getBounds()
+    corner1 = bounds.getSouthEast()
+    corner2 = bounds.getNorthWest()
+    //  corner1 = L.latLng(30.282788098216884, 43.34659087188286)
+    //  corner2 = L.latLng(33.64663552343716, 49.081378775823396)
+    //  bounds = L.latLngBounds(corner1, corner2)
 
      m1 = new L.Marker(corner1,{
         draggable: true
@@ -64,10 +70,12 @@ export function createMap (store) {
       store.commit('updateOverlayC1Lng',corner1.lng)
      })
      m1.addTo(map);
+     m1._icon.classList.add("huechange2")
 
      m2 = new L.Marker(corner2,{
       draggable: true
      })
+
      m2.on('drag', function(e) {
       corner2.lat = e.latlng.lat
       corner2.lng = e.latlng.lng
@@ -79,6 +87,7 @@ export function createMap (store) {
   
      })
      m2.addTo(map);
+     m2._icon.classList.add("huechange2")
 
       map.fitBounds(bounds);
       overlay = new L.ImageOverlay(imageUrl, bounds, {
