@@ -234,6 +234,7 @@ export default {
         fetch('http://localhost:3000/regions/' + this.name)
           .then((response) => response.json())
           .then((data) => {
+            console.log(data)
             data.years.forEach(el => {
               const option = document.createElement("option");
               option.value = el

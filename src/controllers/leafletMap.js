@@ -237,13 +237,13 @@ export function createMap (store) {
 
   function convertToPolygons() {
     drawnItems.clearLayers();
-    const geojson = store.getters.geojson
+    const region = store.getters.region
 
-    if (geojson.geometry.type == 'Polygon') {
-      drawnItems.addData(geojson)
-    } else if (geojson.geometry.type == 'MultiPolygon') {
+    if (region.geometry.type == 'Polygon') {
+      drawnItems.addData(region)
+    } else if (region.geometry.type == 'MultiPolygon') {
 
-      geojson.geometry.coordinates.forEach((coords) => {
+      region.geometry.coordinates.forEach((coords) => {
         drawnItems.addData({
           type : 'Feature',
           properties: {},
