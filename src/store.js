@@ -1,7 +1,7 @@
 
 import { createStore } from 'vuex'
 
-const BLANK_GEOJSON = {
+const BLANK_REGION = {
   type: 'Feature',
   properties: {
     name: '',
@@ -16,60 +16,68 @@ const BLANK_GEOJSON = {
 };
 
 export const store = createStore({
-  state: {
-    geojson: Object.assign({}, BLANK_GEOJSON),
+  state() {
+    return {
+      display: {
+        cities: true,
+        rivers: true,
+      },
+      region: Object.assign({}, BLANK_REGION),
+    }
   },
   mutations: {
     updateName(state,_name) {
-      state.geojson.properties.name = _name
+      state.region.properties.name = _name
     },
     updateYearFrom(state,_year) {
-      state.geojson.properties.year.from = _year
+      state.region.properties.year.from = _year
     },
     updateYearTo(state,_year) {
-      state.geojson.properties.year.to = _year
+      state.region.properties.year.to = _year
     },
     updateKnownAs(state,_known_as) {
-      state.geojson.properties.known_as = _known_as
+      state.region.properties.known_as = _known_as
     },
     updateSource(state,_source) {
-      state.geojson.properties.source = _source
+      state.region.properties.source = _source
     },
     updateOverlayUrl(state,_url) {
-      state.geojson.properties.overlay.url = _url
+      state.region.properties.overlay.url = _url
     },
     updateOverlayC1Lat(state,_lat) {
-      state.geojson.properties.overlay.c1.lat = _lat
+      state.region.properties.overlay.c1.lat = _lat
     },
     updateOverlayC1Lng(state,_lng) {
-      state.geojson.properties.overlay.c1.lng = _lng
+      state.region.properties.overlay.c1.lng = _lng
     },
     updateOverlayC2Lat(state,_lat) {
-      state.geojson.properties.overlay.c2.lat = _lat
+      state.region.properties.overlay.c2.lat = _lat
     },
     updateOverlayC2Lng(state,_lng) {
-      state.geojson.properties.overlay.c2.lng = _lng
+      state.region.properties.overlay.c2.lng = _lng
     },
     updateNote(state,_note) {
-      state.geojson.properties.note = _note
+      state.region.properties.note = _note
     },
     updateLabelLat(state,_lat) {
-      state.geojson.properties.label.lat = _lat
+      state.region.properties.label.lat = _lat
     },
     updateLabelLng(state,_lng) {
-      state.geojson.properties.label.lng = _lng
+      state.region.properties.label.lng = _lng
     },
     updateGeometry(state,_geometry) {
-      state.geojson.geometry = _geometry
+      state.region.geometry = _geometry
     },
   },
   actions: {
     loadOverlay: function() {
+    },
+    removeOverlay: function() {
     }
   },
   getters: {
-    geojson: function (state) {
-      return state.geojson;
+    region: function (state) {
+      return state.region;
     }
   }
 })

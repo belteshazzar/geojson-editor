@@ -36,7 +36,15 @@ export function createMap (store) {
   // sumer image: https://upload.wikimedia.org/wikipedia/commons/d/dd/Sumer_%28map%29.jpg
 
   store.subscribeAction((action) => {
-    if (action.type == 'loadOverlay') {
+    if (action.type == 'removeOverlay') {
+      console.log('remove overlay from: ' + action.payload)
+
+      if (overlay != null) {
+        map.removeLayer(overlay)
+        map.removeLayer(m1)
+        map.removeLayer(m2)
+      }
+    } else if (action.type == 'loadOverlay') {
       console.log('load overlay from: ' + action.payload)
 
       if (overlay != null) {
@@ -44,19 +52,31 @@ export function createMap (store) {
         map.removeLayer(m1)
         map.removeLayer(m2)
       }
+
       const imageUrl = action.payload
+
+      if (imageUrl == '') return
     //   const imageUrl = 'https://upload.wikimedia.org/wikipedia/commons/9/9d/Umma2350.PNG'
 
 
     // https://en.wikipedia.org/wiki/Kingdom_of_Kush
     // https://upload.wikimedia.org/wikipedia/commons/0/07/Kushite_heartland_and_Kushite_Empire_of_the_25th_dynasty_circa_700_BCE.jpg
 
-    bounds = map.getBounds()
-    corner1 = bounds.getSouthEast()
-    corner2 = bounds.getNorthWest()
-    //  corner1 = L.latLng(30.282788098216884, 43.34659087188286)
-    //  corner2 = L.latLng(33.64663552343716, 49.081378775823396)
-    //  bounds = L.latLngBounds(corner1, corner2)
+    const region = store.getters.region
+    console.log(region)
+    if (region.properties.overlay.c1.lat
+      && region.properties.overlay.c1.lng
+      && region.properties.overlay.c2.lat
+      && region.properties.overlay.c2.lng) {
+
+     corner1 = L.latLng(region.properties.overlay.c1.lat, region.properties.overlay.c1.lng)
+     corner2 = L.latLng(region.properties.overlay.c2.lat, region.properties.overlay.c2.lng)
+     bounds = L.latLngBounds(corner1, corner2)
+  } else {
+      bounds = map.getBounds()
+      corner1 = bounds.getSouthEast()
+      corner2 = bounds.getNorthWest()  
+    }
 
      m1 = new L.Marker(corner1,{
         draggable: true
@@ -317,32 +337,32 @@ export function createMap (store) {
 //    map.fitBounds(editableLayers.getBounds())
 // }
 
-export function modifyLabel() {
-  const geojson = store.getters.geojson
-  // const name = geojson.properties.name
-  const lng = geojson.properties.label.lat
-  const lat = geojson.properties.label.lng
+export function modifyRegionLabel() {
+  const region = store.getters.region
+  // const name = region.properties.name
+  const lng = region.properties.label.lat
+  const lat = region.properties.label.lng
   label.setLatLng([lat,lng])  
 }
 
-export function modifyGeoJSON () {
+export function modifyRegionGeometry () {
   drawnItems.clearLayers();
-  const geojson = store.getters.geojson
+  const region = store.getters.region
 
-  if (geojson.type != 'Feature') {
+  if (region.type != 'Feature') {
     console.error('only geojson features supported')
     return
   }
 
-  drawnItems.addData(geojson)
+  drawnItems.addData(region)
 }
 
 export function loadOverlay() {
   console.log("loadOverlay")
 }
 
-export function modifyOverlay() {
-  console.log('modifyOverlay')
+export function modifyRegionOverlay() {
+  console.log('modifyRegionOverlay')
   // if (store.getters.geojson.properties.overlay) {
   //   const data = store.getters.geojson.properties.overlay
 

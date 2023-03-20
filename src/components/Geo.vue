@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import { createMap,modifyGeoJSON,modifyLabel,modifyOverlay } from './../controllers/leafletMap'
+import { createMap,modifyRegionGeometry,modifyRegionLabel,modifyRegionOverlay } from './../controllers/leafletMap'
 
 export default {
   name: 'LeafletMap',
@@ -13,93 +13,69 @@ export default {
   computed: {
     name: {
       get () {
-        return this.$store.state.geojson.properties.name
-      },
-      set (value) {
-        this.$store.commit('updateName', value)
+        return this.$store.state.region.properties.name
       }
     },
     labelLat: {
       get () {
-        return this.$store.state.geojson.properties.label.lat
-      },
-      set (value) {
-        this.$store.commit('updateLabelLat', value)
+        return this.$store.state.region.properties.label.lat
       }
     },
     labelLng: {
       get () {
-        return this.$store.state.geojson.properties.label.lng
-      },
-      set (value) {
-        this.$store.commit('updateLabelLng', value)
+        return this.$store.state.region.properties.label.lng
       }
     },
     overlayC1Lat: {
       get () {
-        return this.$store.state.geojson.properties.overlay.c1.lat
-      },
-      set (value) {
-        this.$store.commit('updateOverlayC1Lat', value)
+        return this.$store.state.region.properties.overlay.c1.lat
       }
     },
     overlayC1Lng: {
       get () {
-        return this.$store.state.geojson.properties.overlay.c1.lng
-      },
-      set (value) {
-        this.$store.commit('updateOverlayC1Lng', value)
+        return this.$store.state.region.properties.overlay.c1.lng
       }
     },
     overlayC2Lat: {
       get () {
-        return this.$store.state.geojson.properties.overlay.c2.lat
-      },
-      set (value) {
-        this.$store.commit('updateOverlayC2Lat', value)
+        return this.$store.state.region.properties.overlay.c2.lat
       }
     },
     overlayC2Lng: {
       get () {
-        return this.$store.state.geojson.properties.overlay.c2.lng
-      },
-      set (value) {
-        this.$store.commit('updateOverlayC2Lng', value)
+        return this.$store.state.region.properties.overlay.c2.lng
       }
     },
     geometry: {
       get () {
-        return this.$store.state.geojson.geometry
-      },
-      set (value) {
-        this.$store.commit('updateGeometry', value)
+        return this.$store.state.region.geometry
       }
     }
   },
   watch: {
     name () {
-      modifyLabel()
+      modifyRegionLabel()
     },
     labelLat () {
-      modifyLabel()
+      modifyRegionLabel()
     },
     labelLng () {
-      modifyLabel()
+      modifyRegionLabel()
     },
     overlayC1Lat () {
-      modifyOverlay()
+      modifyRegionOverlay()
     },
     overlayC1Lng () {
-      modifyOverlay()
+      modifyRegionOverlay()
     },
     overlayC2Lat () {
-      modifyOverlay()
+      modifyRegionOverlay()
     },
     overlayC2Lng () {
-      modifyOverlay()
+      modifyRegionOverlay()
     },
     geometry () {
-      modifyGeoJSON()
+      modifyRegionGeometry()
     }
   }
 }

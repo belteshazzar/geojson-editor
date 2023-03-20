@@ -98,7 +98,7 @@ export default {
   computed: {
     name: {
       get () {
-        return this.$store.state.geojson.properties.name
+        return this.$store.state.region.properties.name
       },
       set (value) {
         this.$store.commit('updateName', value)
@@ -106,7 +106,7 @@ export default {
     },
     yearFrom: {
       get () {
-        return this.$store.state.geojson.properties.year.from
+        return this.$store.state.region.properties.year.from
       },
       set (value) {
         this.$store.commit('updateYearFrom', value)
@@ -114,7 +114,7 @@ export default {
     },
     yearTo: {
       get () {
-        return this.$store.state.geojson.properties.year.to
+        return this.$store.state.region.properties.year.to
       },
       set (value) {
         this.$store.commit('updateYearTo', value)
@@ -122,7 +122,7 @@ export default {
     },
     knownAs: {
       get () {
-        return this.$store.state.geojson.properties.known_as
+        return this.$store.state.region.properties.known_as
       },
       set (value) {
         this.$store.commit('updateKnownAs', value)
@@ -130,7 +130,7 @@ export default {
     },
     source: {
       get () {
-        return this.$store.state.geojson.properties.source
+        return this.$store.state.region.properties.source
       },
       set (value) {
         this.$store.commit('updateSource', value)
@@ -138,7 +138,7 @@ export default {
     },
     overlayUrl: {
       get () {
-        return this.$store.state.geojson.properties.overlay.url
+        return this.$store.state.region.properties.overlay.url
       },
       set (value) {
         this.$store.commit('updateOverlayUrl', value)
@@ -146,7 +146,7 @@ export default {
     },
     overlayC1Lat: {
       get () {
-        return this.$store.state.geojson.properties.overlay.c1.lat
+        return this.$store.state.region.properties.overlay.c1.lat
       },
       set (value) {
         this.$store.commit('updateOverlayC1Lat', value)
@@ -154,7 +154,7 @@ export default {
     },
     overlayC1Lng: {
       get () {
-        return this.$store.state.geojson.properties.overlay.c1.lng
+        return this.$store.state.region.properties.overlay.c1.lng
       },
       set (value) {
         this.$store.commit('updateOverlayC1Lng', value)
@@ -162,7 +162,7 @@ export default {
     },
     overlayC2Lat: {
       get () {
-        return this.$store.state.geojson.properties.overlay.c2.lat
+        return this.$store.state.region.properties.overlay.c2.lat
       },
       set (value) {
         this.$store.commit('updateOverlayC2Lat', value)
@@ -170,7 +170,7 @@ export default {
     },
     overlayC2Lng: {
       get () {
-        return this.$store.state.geojson.properties.overlay.c2.lng
+        return this.$store.state.region.properties.overlay.c2.lng
       },
       set (value) {
         this.$store.commit('updateOverlayC2Lng', value)
@@ -178,7 +178,7 @@ export default {
     },
     note: {
       get () {
-        return this.$store.state.geojson.properties.note
+        return this.$store.state.region.properties.note
       },
       set (value) {
         this.$store.commit('updateNote', value)
@@ -186,7 +186,7 @@ export default {
     },
     labelLat: {
       get () {
-        return this.$store.state.geojson.properties.label.lat
+        return this.$store.state.region.properties.label.lat
       },
       set (value) {
         this.$store.commit('updateLabelLat', value)
@@ -194,7 +194,7 @@ export default {
     },
     labelLng: {
       get () {
-        return this.$store.state.geojson.properties.label.lng
+        return this.$store.state.region.properties.label.lng
       },
       set (value) {
         this.$store.commit('updateLabelLng', value)
@@ -202,7 +202,7 @@ export default {
     },
     geometry: {
       get () {
-        return JSON.stringify(this.$store.state.geojson.geometry)
+        return JSON.stringify(this.$store.state.region.geometry)
       },
       set (value) {
         this.$store.commit('updateGeometry', JSON.parse(value))
@@ -317,9 +317,9 @@ export default {
     },
     async submit() {
 
-      const geojson = this.$store.getters.geojson
+      const region = this.$store.getters.region
 
-      await fetch(`http://localhost:3000/regions/${geojson.properties.name}/${geojson.properties.year.from}`,{
+      await fetch(`http://localhost:3000/regions/${region.properties.name}/${region.properties.year.from}`,{
         method: 'PUT',
         mode: 'cors', // no-cors, *cors, same-origin
         cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
@@ -329,7 +329,7 @@ export default {
         },
         redirect: 'error',
         referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-        body: JSON.stringify(geojson) 
+        body: JSON.stringify(region) 
       })
 
       .then((data) => {
@@ -354,6 +354,7 @@ export default {
       this.$store.commit('updateLabelLat',0.0)
       this.$store.commit('updateLabelLng',0.0)
       this.$store.commit('updateGeometry',null)
+      this.$store.dispatch('removeOverlay')
     }
   }
 }
