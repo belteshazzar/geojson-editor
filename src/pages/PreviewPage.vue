@@ -3,7 +3,7 @@
     <div id="preview-map" />
     <div id="slider">
       <div v-text="yearText"></div>
-      <div><input type="range" min="-4000" max="1999" step="1" v-model="index" /></div>
+      <div><input type="range" min="-4000" max="2020" step="1" v-model="index" /></div>
     </div>
   </div>
 </template>
@@ -17,7 +17,7 @@ let layers = []
 function updateVisibility(year) {
   layers.forEach((layer) => {
     layer.layer.setStyle({
-      color: year < layer.year ? 'rgba(0,0,0,0)' : 'rgba(0,0,1,1.0)'
+      color:  (year >= layer.year.from && year <= layer.year.to) ? 'rgba(0,0,1,1.0)' : 'rgba(0,0,0,0.0)'
     })
   })
 }

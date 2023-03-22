@@ -11,6 +11,8 @@
       <label for="yearFrom">Year From: </label>
       <input type="search" class="not-exists" list="yearList" id="yearFrom" name="yearFrom" v-model="yearFrom"/>
       <datalist id="yearList"></datalist>
+      <button id="prev" name="prev" @click="prev">prev</button>
+      <button id="next" name="next" @click="next">next</button>
     </div>
 
     <div class="sidebar-half">
@@ -72,6 +74,7 @@
     </div>
     <div class="sidebar-half">
       <button id="reset" name="reset" @click="reset">reset</button>
+      <button id="remove" name="remove" @click="remove">delete</button>
     </div>
   </div>
 </div>
@@ -333,8 +336,11 @@ export default {
         body: JSON.stringify(region) 
       })
 
-      .then((data) => {
-        alert('Success:', data);
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(response.statusText);
+        }
+        alert('Success:', response);
       })
       .catch((error) => {
         alert('Error:', error);
@@ -356,6 +362,47 @@ export default {
       this.$store.commit('updateLabelLng',0.0)
       this.$store.commit('updateGeometry',null)
       this.$store.dispatch('removeOverlay')
+    },
+    prev() {
+      const years = [...document.querySelectorAll('#yearList option')].map( option => option.value)
+      const curr = years.indexOf(this.yearFrom)
+
+      if (curr > 0) {
+        this.$store.commit('updateYearFrom',years[curr-1])
+      }
+    },
+    next() {
+      const years = [...document.querySelectorAll('#yearList option')].map( option => option.value)
+      const curr = years.indexOf(this.yearFrom)
+
+      if (curr + 1 < years.length) {
+        this.$store.commit('updateYearFrom',years[curr+1])
+      }
+    },
+    async remove() {
+
+      const that = this;
+      const region = this.$store.getters.region
+
+      await fetch(`http://localhost:3000/regions/${region.properties.name}/${region.properties.year.from}`,{
+        method: 'DELETE',
+        mode: 'cors', // no-cors, *cors, same-origin
+        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: 'omit', // include, *same-origin, omit
+        redirect: 'error',
+        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+      })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(response.statusText);
+        }
+        alert('Success:', response);
+        that.reset()
+      })
+      .catch((error) => {
+        alert(error.message);
+      });
+
     }
   }
 }

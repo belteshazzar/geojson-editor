@@ -106,6 +106,23 @@ app.get('/regions/:region/:year', (req,res) => {
     res.json(json);
 });
 
+app.delete('/regions/:region/:year', (req,res) => {
+    const region = req.params.region.toLowerCase()
+    const year = req.params.year
+    const filename = datadir + '/' + region + '/' + region + '_' + year + '.geojson'
+
+    if (fs.existsSync(filename)) {
+        fs.unlinkSync(filename)
+        if (fs.existsSync(filename)) {
+            res.status(400).send('failed to delete')
+        } else {
+            res.send()
+        }
+    } else {
+        res.status(400).send('not deleted')
+    }
+})
+
 app.put('/regions/:region/:year', (req,res) => {
     const region = req.params.region.toLowerCase()
     const year = req.params.year
