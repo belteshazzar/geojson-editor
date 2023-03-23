@@ -3,7 +3,7 @@
     <div id="preview-map" />
     <div id="slider">
       <div v-text="yearText"></div>
-      <div><input type="range" min="-4000" max="2020" step="1" v-model="index" /></div>
+      <div><input type="range" min="-13000" max="2020" step="1" v-model="index" /></div>
     </div>
   </div>
 </template>
