@@ -4,7 +4,7 @@
 
     <div class="sidebar-half">
       <label for="name">Name: </label>
-      <input type="search" class="not-exists" list="nameList" id="name" name="name" v-model="name" />
+      <input type="search" class="not-exists" list="nameList" id="name" name="name" v-model="name" autocomplete="off" />
       <datalist id="nameList"></datalist>
     </div>
     <div class="sidebar-half">
