@@ -409,11 +409,10 @@ export default {
 
 </script>
 
-<style>
+<style scoped>
 .sidebar {
-  height: 100vh;
-  width: 30%;
-  float: right;
+  height: 100%;
+  width: 100%;
 }
 
 .sidebar-padding {

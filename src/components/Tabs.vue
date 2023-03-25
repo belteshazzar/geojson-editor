@@ -1,6 +1,6 @@
 <template>
-  <div>
-      <div class="tabs">
+  <div class="tabs">
+      <div class="tabs-header">
           <ul>
               <li 
                 v-for="tab in tabs" 
@@ -42,14 +42,14 @@
 
 <style>
 
-  div.tabs > ul {
+  div.tabs-header > ul {
     display: block;
     list-style: none;
     margin: 0 0 0 20px;
     padding: 0;
   }
 
-  div.tabs > ul > li {
+  div.tabs-header > ul > li {
     padding: 5px 5px;
     border-radius: 10px 10px 0 0;
     margin: 0;
@@ -60,7 +60,7 @@
     color: #aaa;
   }
 
-  div.tabs > ul > li.is-active {
+  div.tabs-header > ul > li.is-active {
     background-color: #fff;
     border-top: 1px solid #ddd;
     border-left: 1px solid #ddd;

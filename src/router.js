@@ -1,16 +1,16 @@
 import { createWebHistory, createRouter } from "vue-router";
 
 import EditorPage from "./pages/EditorPage.vue";
-import PreviewPage from "./pages/PreviewPage.vue"
+// import PreviewPage from "./pages/PreviewPage.vue"
 
 const routes = [
   {
     path: "/",
    component: EditorPage,
-  },
-  {
-    path: "/preview",
-    component: PreviewPage
+  // },
+  // {
+  //   path: "/preview",
+  //   component: PreviewPage
   }
 ];
 

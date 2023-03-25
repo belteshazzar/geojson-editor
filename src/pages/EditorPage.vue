@@ -1,10 +1,14 @@
 <template>
-  <Geo />
-  <Tabs>
-    <Tab name="Region"><RegionEdit /></Tab>
-    <Tab name="City"><CityEdit /></Tab>
-    <Tab name="River"><RiverEdit /></Tab>
-  </Tabs>
+  <div class="geo-holder">
+    <Geo />
+  </div>
+  <div class="tabs-holder">
+    <Tabs>
+      <Tab name="Region"><RegionEdit /></Tab>
+      <Tab name="City"><CityEdit /></Tab>
+      <Tab name="River"><RiverEdit /></Tab>
+    </Tabs>
+</div>
 </template>
 
 <script>
@@ -50,5 +54,17 @@ html, body {
   left: 0px;
   width: 100%;
   height: 100vh;
+}
+
+div.geo-holder {
+  height: 100%;
+  width: 66%;
+  float: left;
+}
+
+div.tabs-holder {
+  height: 100%;
+  width: 33%;
+  float: right;
 }
 </style>
