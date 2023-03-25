@@ -1,11 +1,14 @@
 const util = require('util')
 
+const colors = require('./colors.js').colors
+
 const express = require('express')
 const app = express()
 app.use(express.json())
 const cors = require('cors');
 app.use(cors())
 const port = 3000
+
 const fs = require('fs');
 const datadir = 'data/regions'
 
@@ -47,7 +50,7 @@ app.get('/regions', (req,res) => {
         .map(item => item.name)
         .forEach(region => {
 
-            all[region] = {}
+            all[region] = { color: colors[Object.values(all).length], years: {} }
 
             fs.readdirSync(datadir + '/' + region, {withFileTypes: true})
                 .filter(item => !item.isDirectory())
@@ -57,7 +60,7 @@ app.get('/regions', (req,res) => {
                     const year = filename.replace(/\.geojson$/,'').replace(/^.*_/,'')
                     const json = JSON.parse(fs.readFileSync(datadir + '/' + region + '/' + filename,'utf-8'))
 
-                    all[region][year] = json
+                    all[region].years[year] = json
 
                 })
         })

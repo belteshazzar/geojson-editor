@@ -1,12 +1,1 @@
-{
-    "type": "Feature",
-    "properties": {
-        "name": "Uruk"
-    },
-    "geometry": {
-      "coordinates": [
-        31.324167, 45.637222
-      ],
-    "type": "Point"
-  }
-}
+{"type":"Feature","properties":{"name":"Uruk","founded":"-4000","abandoned":"700","source":"https://en.wikipedia.org/wiki/Uruk"},"geometry":{"coordinates":[31.32416667,45.63722222],"type":"Point"}}

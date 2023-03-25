@@ -17,7 +17,7 @@ let layers = []
 function updateVisibility(year) {
   layers.forEach((layer) => {
     layer.layer.setStyle({
-      color:  (year >= layer.year.from && year <= layer.year.to) ? 'rgba(0,0,1,1.0)' : 'rgba(0,0,0,0.0)'
+      color:  (year >= layer.year.from && year <= layer.year.to) ? layer.color : 'rgba(0,0,0,0.0)'
     })
   })
 }
@@ -60,24 +60,24 @@ export default {
           .then((response) => response.json())
           .then((data) => {
 
-            for (const years of Object.values(data)) {
+            for (const region of Object.values(data)) {
 
-              for (const feature of Object.values(years)) {
+              for (const feature of Object.values(region.years)) {
 
 
                 const layer = L.geoJSON(feature, {
-                  style: function () {
-                    return {
-                      color: '#666C79'
-                    }
-                  }
+                  // style: function () {
+                  //   return {
+                  //     color: region.color
+                  //   }
+                  // }
                 })
                 .bindTooltip(feature.properties.name, {
                   // permanent: true, 
                   direction: 'right'
                 })
                 layer.addTo(map)
-                layers.push({year: feature.properties.year, layer: layer})
+                layers.push({color: region.color, year: feature.properties.year, layer: layer})
 
               }
             }
