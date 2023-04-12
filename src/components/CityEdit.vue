@@ -210,7 +210,7 @@ label {
 input, label, textarea, button {
     display: block;
     font-family: Avenir, Helvetica, Arial, sans-serif;
-    font-size: large;
+    /* font-size: large; */
 }
 
 input, textarea, button {

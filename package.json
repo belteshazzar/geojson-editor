@@ -8,6 +8,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@geoman-io/leaflet-geoman-free": "^2.14.2",
     "@turf/boolean-contains": "^6.5.0",
     "@turf/combine": "^6.5.0",
     "@turf/difference": "^6.5.0",
@@ -16,6 +17,7 @@
     "@turf/random": "^6.5.0",
     "@turf/rewind": "^6.5.0",
     "@turf/turf": "^6.5.0",
+    "@turf/union": "^6.5.0",
     "axios": "^1.2.4",
     "core-js": "^3.8.3",
     "cors": "^2.8.5",

@@ -4,7 +4,10 @@
   </div>
   <div class="tabs-holder">
     <Tabs>
-      <Tab name="Region"><RegionEdit /></Tab>
+      <Tab name="Region">
+        <RegionLookup />
+        <RegionEdit />
+      </Tab>
       <Tab name="City"><CityEdit /></Tab>
       <Tab name="River"><RiverEdit /></Tab>
     </Tabs>
@@ -16,6 +19,7 @@
 import Tab from '../components/Tab.vue'
 import Tabs from '../components/Tabs.vue'
 import Geo from '../components/Geo.vue'
+import RegionLookup from '../components/RegionLookup.vue'
 import RegionEdit from '../components/RegionEdit.vue'
 import RiverEdit from '../components/RiverEdit.vue'
 import CityEdit from '../components/CityEdit.vue'
@@ -26,6 +30,7 @@ export default {
     Tab,
     Tabs,
     Geo,
+    RegionLookup,
     RegionEdit,
     RiverEdit,
     CityEdit

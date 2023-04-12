@@ -2,14 +2,18 @@
   <div class="geo">
     <div id="map" />
     <div id="slider">
-      <div v-text="yearText"></div>
-      <div><input type="range" min="-13000" max="2020" step="1" v-model="index" /></div>
-      <div><input type="checkbox" v-model="cities" /></div>
+      <div id="yearText" v-text="yearText"></div>
+      <div><input type="range" min="-3500" max="2020" step="1" v-model="index" /></div>
+      <div><label for="showCities">Show Cities: </label><input type="checkbox" id="showCities" v-model="cities" /></div>
     </div>
   </div>
 </template>
 
 <script>
+
+// TODO: snapping https://www.npmjs.com/package/@geoman-io/leaflet-geoman-free#snapping
+
+
 // import { updateVisibility,createMap,modifyRegionGeometry,modifyRegionLabel,modifyRegionOverlay } from './../controllers/leafletMap'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -17,8 +21,12 @@ import markerIcon from 'leaflet/dist/images/marker-icon.png'
 import marker2x from 'leaflet/dist/images/marker-icon-2x.png'
 import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 
-import 'leaflet-draw'
-import 'leaflet-draw/dist/leaflet.draw.css'
+// import 'leaflet-draw'
+// import 'leaflet-draw/dist/leaflet.draw.css'
+
+import '@geoman-io/leaflet-geoman-free';  
+import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
+import union from '@turf/union'
 
 //import 'leaflet-distortableimage'
 
@@ -31,9 +39,11 @@ L.Icon.Default.mergeOptions({
 })
 
 let map = null
-let empires = [] // regions
-let rivers = L.layerGroup()
-let cities = L.layerGroup()
+let regionsLayer = null
+let regionLayers = {}
+
+// let rivers = L.layerGroup()
+// let cities = L.layerGroup()
 let drawnItems = null
 var label = null
 
@@ -101,8 +111,7 @@ function createMap (store) {
       corner1.lng = e.latlng.lng
       bounds = L.latLngBounds(corner1,corner2)
       overlay.setBounds(bounds)
-      store.commit('updateOverlayC1Lat',corner1.lat)
-      store.commit('updateOverlayC1Lng',corner1.lng)
+      store.commit('updateOverlayC1',corner1.lat,corner1.lng)
      })
      m1.addTo(map);
      m1._icon.classList.add("huechange2")
@@ -117,8 +126,7 @@ function createMap (store) {
       bounds = L.latLngBounds(corner1,corner2)
       overlay.setBounds(bounds)
 
-      store.commit('updateOverlayC2Lat',corner2.lat)
-      store.commit('updateOverlayC2Lng',corner2.lng)
+      store.commit('updateOverlayC2',corner2.lat,corner2.lng)
   
      })
      m2.addTo(map);
@@ -131,10 +139,8 @@ function createMap (store) {
       });
       map.addLayer(overlay);
     
-     store.commit('updateOverlayC1Lat',corner1.lat)
-     store.commit('updateOverlayC1Lng',corner1.lng)
-     store.commit('updateOverlayC2Lat',corner2.lat)
-     store.commit('updateOverlayC2Lng',corner2.lng)
+     store.commit('updateOverlayC1',corner1.lat,corner1.lng)
+     store.commit('updateOverlayC2',corner2.lat,corner2.lng)
 
     }
   })
@@ -147,6 +153,9 @@ function createMap (store) {
     subdomains: 'abcd',
     maxZoom: 19
   }).addTo(map)
+
+  regionsLayer = L.layerGroup()
+  regionsLayer.addTo(map)
 
   drawnItems = L.geoJSON(null, {
     style: function () {
@@ -163,40 +172,50 @@ function createMap (store) {
 
   label._icon.classList.add("huechange")
 
-  fetch('http://localhost:3000/rivers')
-    .then((response) => response.json())
-    .then((data) => {
-      for (var r in data) {
-          L.geoJSON(data[r]).addTo(rivers);
-      }
-      rivers.addTo(map)
-  })
-
-  map.addControl(new L.Control.Draw({
+  map.pm.setGlobalOptions({layerGroup : drawnItems})
+  map.pm.addControls({  
     position: 'topright',
-    edit: {
-      featureGroup: drawnItems,
-      poly: {
-        allowIntersection: false
-      }
-    },
-    draw: {
-      marker: false,
-      polyline: false,
-      polygon: {
-        allowIntersection: true
-      },
-      rectangle: false,
-      circlemarker: false,
-      circle: false
-    }
-  }))
+    drawMarker: false,
+    drawPolyline: false,
+    drawRectangle: false,
+    drawCircleMarker: false,
+    drawText: false,
+    drawCircle: false,
+    dragMode: false,
+    cutPolygon: false,
+    rotateMode: false,  
+    removalMode: false,
+  });
+
+  // map.addControl(new L.Control.Draw({
+  //   position: 'topright',
+  //   edit: {
+  //     featureGroup: drawnItems,
+  //     poly: {
+  //       allowIntersection: false
+  //     }
+  //   },
+  //   draw: {
+  //     marker: false,
+  //     polyline: false,
+  //     polygon: {
+  //       allowIntersection: true
+  //     },
+  //     rectangle: false,
+  //     circlemarker: false,
+  //     circle: false
+  //   }
+  // }))
 
   map.on('zoomend', function (e) {
     console.log(e)
   })
 
-  map.on('draw:created', function (e) {
+  map.on('pm:create', function (e) {
+    console.log('pm:create')
+
+    console.log(e)
+
     const newLayer = e.layer;
     const newGeoJSON = newLayer.toGeoJSON()
 
@@ -243,8 +262,10 @@ function createMap (store) {
     drawnItems.clearLayers();
     const region = store.getters.region
 
+    if (region.geometry == null) return
+
     if (region.geometry.type == 'Polygon') {
-      drawnItems.addData(region)
+      console.log(drawnItems.addData(region))
     } else if (region.geometry.type == 'MultiPolygon') {
 
       region.geometry.coordinates.forEach((coords) => {
@@ -292,13 +313,15 @@ function createMap (store) {
 
   // MultiPolygon editing doesn't work
   // so convert to polygons
-  map.on(L.Draw.Event.EDITSTART, convertToPolygons)
-  map.on(L.Draw.Event.DELETESTART, convertToPolygons)
+
+  map.on('pm:drawstart', convertToPolygons)
+  // map.on(L.Draw.Event.DELETESTART, convertToPolygons)
 
   // MultiPolygon editing doesn't work
   // so convert to polygons and back on stop
-  map.on(L.Draw.Event.EDITSTOP, convertToMultiPolygons)
-  map.on(L.Draw.Event.DELETESTOP, convertToMultiPolygons)
+  
+  map.on('pm:drawend', convertToMultiPolygons)
+  // map.on(L.Draw.Event.DELETESTOP, convertToMultiPolygons)
 
   // map.on('click', clickHandlerForMap)
 
@@ -321,8 +344,7 @@ function createMap (store) {
   // })
 
   label.on('drag',function() {
-    store.commit('updateLabelLat',label.getLatLng().lng)
-    store.commit('updateLabelLng',label.getLatLng().lat)
+    store.commit('updateLabel',{lat:label.getLatLng().lat,lng:label.getLatLng().lng})
   })
 
   // map.on(L.Draw.Event.DELETED, function () {
@@ -344,8 +366,10 @@ function createMap (store) {
 function modifyRegionLabel(store) {
   const region = store.getters.region
   // const name = region.properties.name
-  const lng = region.properties.label.lat
-  const lat = region.properties.label.lng
+  const lat = region.properties.label.lat
+  const lng = region.properties.label.lng
+  const ll = label.getLatLng()
+  if (lat==ll.lat || lng==ll.lng) return
   label.setLatLng([lat,lng])  
 }
 
@@ -397,8 +421,11 @@ export default {
   },
   mounted () {
     createMap(this.$store)
-    this.fetchRegions()
-    this.fetchCities()
+    // console.log(this.$store.state.regions)
+    // console.log(this.$store.state.cities)
+    // console.log(this.$store.state.rivers)
+    // this.fetchRegions()
+    // this.fetchCities()
     
   },
   computed: {
@@ -454,10 +481,122 @@ export default {
     }
   },
   watch: {
+    '$store.state.region': {
+      deep: false,
+      handler: function() {
+        this.updateVisibility()
+      }
+    },
+    // '$store.state.regions': {
+    '$store.state.regionsSize': {
+      deep: false,
+      handler: function() {
+        // regions updated
+console.log('regions updated')
+        // TODO: only adds, should also remove
+        const store = this.$store
+        const data = store.state.regions
+
+        for (const name of Object.keys(data)) {
+          const region = data[name]
+          for (const year of Object.keys(region)) {
+
+            const key = `${name}-${year}`
+            if (!regionLayers[key]) {
+              const layer = L.geoJSON(region[year])
+              layer.pm.setOptions({ allowEditing: false })
+              layer._name = name
+              layer._from = region[year].properties.year.from
+              layer._to = region[year].properties.year.to
+              layer.on('click',function(ev) {
+                if (ev.originalEvent.shiftKey) {
+                  const geom1 = store.state.region.geometry
+                  const geom2 = region[year].geometry
+                  if (geom1==null) {
+                    store.commit('updateGeometry',geom2)
+                  } else {
+                    var u = union(geom1, geom2);
+                    store.commit('updateGeometry',u.geometry)
+                  }
+                } else {
+                  try {
+                  store.commit('setRegion',{name,year})
+                  } catch (e) {
+                    console.log(e)
+                  }
+                }
+              });
+              regionLayers[key] = layer
+            }
+          }
+        }
+
+        this.updateVisibility()
+
+            // const nameList = document.getElementById('nameList')
+            // data.regions.forEach(el => {
+            //   const option = document.createElement("option");
+            //   option.value = el
+            //   nameList.appendChild(option);
+            // });
+      }
+    },
+    '$store.state.cities': {
+      deep: true,
+      handler: function() {
+
+        // const store = this.$store
+
+        // for (const name of Object.keys(data)) {
+
+          // const city = data[name]
+          // console.log(city)
+          // for (const year of Object.keys(region)) {
+
+          //   const key = `${name}-${year}`
+          //   if (!regionLayers[key]) {
+          //     const layer = L.geoJSON(region[year].geojson)
+          //     layer._region = region[year]
+          //     layer.on('click',function() {
+          //       store.commit('setRegion',region[year].geojson)
+          //     });
+          //     regionLayers[key] = layer
+          //   }
+          // }
+        // }
+
+        this.updateVisibility()
+      }
+    },
+    '$store.state.rivers': {
+      deep: true,
+      handler: function() {
+        console.log(this.$store.state.rivers)
+        // const store = this.$store
+        // for (const name of Object.keys(data)) {
+        //   const region = data[name]
+        //   for (const year of Object.keys(region)) {
+
+        //     const key = `${name}-${year}`
+        //     if (!regionLayers[key]) {
+        //       const layer = L.geoJSON(region[year].geojson)
+        //       layer._region = region[year]
+        //       layer.on('click',function() {
+        //         store.commit('setRegion',region[year].geojson)
+        //       });
+        //       regionLayers[key] = layer
+        //     }
+        //   }
+        // }
+
+        // this.updateVisibility()
+      }
+    },
     year() {
       this.updateVisibility()
     },
     cities() {
+      console.log('cities')
       this.updateVisibility()
     },
     name () {
@@ -486,87 +625,123 @@ export default {
     }
   },
   methods: {
-    fetchRegions() {
-      fetch('http://localhost:3000/regions')
-        .then((response) => response.json())
-        .then((data) => {
+    // fetchRegions() {
+    //   fetch('http://localhost:3000/regions')
+    //     .then((response) => response.json())
+    //     .then((data) => {
 
-            for (const region of Object.values(data)) {
+    //         for (const region of Object.values(data)) {
 
-              for (const feature of Object.values(region.years)) {
+    //           for (const feature of Object.values(region.years)) {
 
 
-                const layer = L.geoJSON(feature, {
-                  // style: function () {
-                  //   return {
-                  //     color: region.color
-                  //   }
-                  // }
-                })
-                .bindTooltip(feature.properties.name, {
-                  // permanent: true, 
-                  direction: 'right'
-                })
-                layer.addTo(map)
-                empires.push({color: region.color, year: feature.properties.year, layer: layer})
+    //             const layer = L.geoJSON(feature, {
+    //               // style: function () {
+    //               //   return {
+    //               //     color: region.color
+    //               //   }
+    //               // }
+    //             })
+    //             .bindTooltip(feature.properties.name, {
+    //               // permanent: true, 
+    //               direction: 'right'
+    //             })
+    //             layer.addTo(map)
+    //             empires.push({color: region.color, year: feature.properties.year, layer: layer})
 
-              }
-            }
+    //           }
+    //         }
 
-            this.updateVisibility()
+    //         this.updateVisibility()
 
-            // const nameList = document.getElementById('nameList')
-            // data.regions.forEach(el => {
-            //   const option = document.createElement("option");
-            //   option.value = el
-            //   nameList.appendChild(option);
-            // });
-          });
-    },
+    //         // const nameList = document.getElementById('nameList')
+    //         // data.regions.forEach(el => {
+    //         //   const option = document.createElement("option");
+    //         //   option.value = el
+    //         //   nameList.appendChild(option);
+    //         // });
+    //       });
+    // },
     updateVisibility() {
-      empires.forEach((layer) => {
-        layer.layer.setStyle({
-          color:  (this.year >= layer.year.from && this.year <= layer.year.to) ? layer.color : 'rgba(0,0,0,0.0)'
-        })
-      })
 
-      cities.eachLayer((city) => {
-        city._icon.style.display = ((this.year >= city.meta.year.from && this.year <= city.meta.year.to) ? '' : 'none' )
-        city._shadow.style.display = ((this.year >= city.meta.year.from && this.year <= city.meta.year.to) ? '' : 'none' )
-      })
-    },
-    fetchCities() {
-      fetch('http://localhost:3000/cities')
-        .then((response) => response.json())
-        .then((data) => {
+      const regionKey = `${this.$store.getters.region.properties.name}-${this.$store.getters.region.properties.year.from}`
 
-          for (var c in data) {
-              const l = new L.Marker(data[c].geometry.coordinates)
-              l.on('click', (ev) => {
-                console.log(this,ev);
-              })
-              l.bindTooltip(data[c].properties.name, {
-                    // permanent: true, 
-                    direction: 'right'
-                }).on('click',() => {
-                  console.log(data[c])
-                })
-              l.meta = {
-                city: data[c],
-                year: {
-                  from: (data[c].properties.founded ? data[c].properties.founded : 2020),
-                  to: (data[c].properties.abandoned ? data[c].properties.abandoned : 3000)
-                }
-              };
-              l.addTo(cities)
+      regionsLayer.eachLayer((layer) => {
+
+          const name = layer._name
+          const from = layer._from
+          const to = layer._to
+          const key = `${name}-${from}`
+
+          if (key == regionKey || this.year < from || this.year > to) {
+            regionsLayer.removeLayer(layer)
           }
-
-          cities.addTo(map)
-          this.updateVisibility()
       })
 
+      for ( const k in regionLayers) {
+        const layer = regionLayers[k]
+        const name = layer._name
+        const from = layer._from
+        const to = layer._to
+        const key = `${name}-${from}`
 
-    }
+        if (key != regionKey && this.year >= from && this.year <= to) {
+          regionsLayer.addLayer(layer)
+
+        }
+
+      }
+      // const rs = this.$store.state.regions
+      // for (const name of Object.keys(rs)) {
+      //   const region = rs[name]
+      //   for (const year of Object.keys(region)) {
+      //     const color = region[year].color
+      //     const layer = region[year].layer
+      //     const from = region[year].geojson.properties.year.from
+      //     const to = region[year].geojson.properties.year.to
+
+      //     layer.setStyle({
+      //       color:  (this.year >= from && this.year <= to) ? color : 'rgba(0,0,0,0.0)'
+      //     })
+      //   }
+      // }
+
+      // cities.eachLayer((city) => {
+      //   city._icon.style.display = ((this.year >= city.meta.year.from && this.year <= city.meta.year.to) ? '' : 'none' )
+      //   city._shadow.style.display = ((this.year >= city.meta.year.from && this.year <= city.meta.year.to) ? '' : 'none' )
+      // })
+
+    },
+    // fetchCities() {
+      // fetch('http://localhost:3000/cities')
+      //   .then((response) => response.json())
+      //   .then((data) => {
+
+      //     for (var c in data) {
+      //         const l = new L.Marker(data[c].geometry.coordinates)
+      //         l.on('click', (ev) => {
+      //           console.log(this,ev);
+      //         })
+      //         l.bindTooltip(data[c].properties.name, {
+      //               // permanent: true, 
+      //               direction: 'right'
+      //           }).on('click',() => {
+      //             console.log(data[c])
+      //           })
+      //         l.meta = {
+      //           city: data[c],
+      //           year: {
+      //             from: (data[c].properties.founded ? data[c].properties.founded : 2020),
+      //             to: (data[c].properties.abandoned ? data[c].properties.abandoned : 3000)
+      //           }
+      //         };
+      //         l.addTo(cities)
+      //     }
+
+      //     cities.addTo(map)
+      //     this.updateVisibility()
+      // })
+    // }
 
   }
 }
@@ -594,7 +769,7 @@ export default {
   z-index: 1000;
 }
 
-#slider div {
+#slider #yearText {
   font-size: xx-large;
 }
 

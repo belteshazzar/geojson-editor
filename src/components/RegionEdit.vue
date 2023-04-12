@@ -2,18 +2,6 @@
   <div class="sidebar">
     <div class="sidebar-padding">
 
-    <div class="sidebar-half">
-      <label for="name">Name: </label>
-      <input type="search" class="not-exists" list="nameList" id="name" name="name" v-model="name" autocomplete="off" />
-      <datalist id="nameList"></datalist>
-    </div>
-    <div class="sidebar-half">
-      <label for="yearFrom">Year From: </label>
-      <input type="search" class="not-exists" list="yearList" id="yearFrom" name="yearFrom" v-model="yearFrom"/>
-      <datalist id="yearList"></datalist>
-      <button id="prev" name="prev" @click="prev">prev</button>
-      <button id="next" name="next" @click="next">next</button>
-    </div>
 
     <div class="sidebar-half">
       <label for="known-as">Known As: </label>
@@ -70,10 +58,10 @@
 
 
     <div class="sidebar-half">
-      <button id="submit" name="submit" @click="submit">submit</button>
+      <button id="save" name="save" @click="save">save</button>
     </div>
     <div class="sidebar-half">
-      <button id="reset" name="reset" @click="reset">reset</button>
+      <button id="reset" name="reset" @click="reset">clear selection</button>
       <button id="remove" name="remove" @click="remove">delete</button>
     </div>
   </div>
@@ -87,16 +75,6 @@
 export default {
   name: 'SideMenu',
   mounted() {
-    fetch('http://localhost:3000/regionNames')
-      .then((response) => response.json())
-      .then((data) => {
-        const nameList = document.getElementById('nameList')
-        data.regions.forEach(el => {
-          const option = document.createElement("option");
-          option.value = el
-          nameList.appendChild(option);
-        });
-      });
   },
   computed: {
     name: {
@@ -189,10 +167,10 @@ export default {
     },
     labelLat: {
       get () {
-        return this.$store.state.region.properties.label.lat
+        return this.$store.getters.region.properties.label.lat
       },
       set (value) {
-        this.$store.commit('updateLabelLat', value)
+        this.$store.commit('updateLabel', {lat:value,lng:this.$store.region.properties.label.lng})
       }
     },
     labelLng: {
@@ -200,7 +178,7 @@ export default {
         return this.$store.state.region.properties.label.lng
       },
       set (value) {
-        this.$store.commit('updateLabelLng', value)
+        this.$store.commit('updateLabel', {lat: this.$store.state.region.properties.label.lat, lng: value})
       }
     },
     geometry: {
@@ -212,172 +190,15 @@ export default {
       }
     }
   },
-  data() {
-    return {
-      nameExists: false,
-      yearExists: false,
-    }
-  },
-  watch: {
-    name(newName,oldName) {
-
-      if (newName.toLowerCase() == oldName.toLowerCase()) {
-        return
-      }
-      const names = [...document.querySelectorAll('#nameList option')].map( option => option.value)
-
-      this.yearExists = false
-      const yearList = document.getElementById('yearList')
-      yearList.replaceChildren()
-
-      if (names.includes(this.name)) {
-        document.querySelector('#name').classList.remove('not-exists')
-        document.querySelector('#name').classList.add('exists')
-
-        fetch('http://localhost:3000/regions/' + this.name)
-          .then((response) => response.json())
-          .then((data) => {
-            console.log(data)
-            data.years.forEach(el => {
-              const option = document.createElement("option");
-              option.value = el
-              yearList.appendChild(option);
-            });
-            this.nameExists = true
-          })
-          .catch(() => {
-            this.nameExists = false
-          });
-
-      } else {
-        document.querySelector('#name').classList.remove('exists')
-        document.querySelector('#name').classList.add('not-exists')
-      }
-    },
-    yearFrom() {
-
-      const years = [...document.querySelectorAll('#yearList option')].map( option => option.value)
-
-      if (years.includes(`${this.yearFrom}`)) {
-        document.querySelector('#yearFrom').classList.remove('not-exists')
-        document.querySelector('#yearFrom').classList.add('exists')
-        this.yearExists = true
-
-        if (this.nameExists) {
-
-          fetch('http://localhost:3000/regions/' + this.name + '/' + this.yearFrom)
-            .then((response) => response.json())
-            .then((data) => {
-              // this.knownAs = data.properties.known_as
-              // this.source = data.properties.source
-              // this.note = data.properties.note
-              // this.geometry = JSON.stringify(data.geometry)
-              this.$store.commit('updateYearTo',data.properties.year.to)
-              this.$store.commit('updateKnownAs',data.properties.known_as)
-              this.$store.commit('updateSource',data.properties.source)
-              if (data.properties.overlay) {
-                this.$store.commit('updateOverlayUrl',data.properties.overlay.url)
-                this.$store.commit('updateOverlayC1Lat',data.properties.overlay.c1.lat)
-                this.$store.commit('updateOverlayC1Lng',data.properties.overlay.c1.lng)
-                this.$store.commit('updateOverlayC2Lat',data.properties.overlay.c2.lat)
-                this.$store.commit('updateOverlayC2Lng',data.properties.overlay.c2.lng)
-              } else {
-                this.$store.commit('updateOverlayUrl','')
-                this.$store.commit('updateOverlayC1Lat','')
-                this.$store.commit('updateOverlayC1Lng','')
-                this.$store.commit('updateOverlayC2Lat','')
-                this.$store.commit('updateOverlayC2Lng','')
-              }
-              this.$store.commit('updateNote',data.properties.note)
-              if (data.properties.label) {
-              this.$store.commit('updateLabelLat',data.properties.label.lat)
-              this.$store.commit('updateLabelLng',data.properties.label.lng)
-              } else {
-                this.$store.commit('updateLabelLat','')
-                this.$store.commit('updateLabelLng','')
-              }
-              this.$store.commit('updateGeometry',data.geometry)
-
-              // store.commit('setGeoJSON', data)
-            })
-            .catch((reason) => {
-              console.log(reason)
-              this.nameExists = false
-            });
-
-        }
-
-      } else {
-        document.querySelector('#yearFrom').classList.remove('exists')
-        document.querySelector('#yearFrom').classList.add('not-exists')
-        this.yearExists = false
-      }
-
-    }
-  },
   methods: {
     loadOverlay() {
       this.$store.dispatch('loadOverlay',this.overlayUrl)
     },
-    async submit() {
-
-      const region = this.$store.getters.region
-
-      await fetch(`http://localhost:3000/regions/${region.properties.name}/${region.properties.year.from}`,{
-        method: 'PUT',
-        mode: 'cors', // no-cors, *cors, same-origin
-        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-        credentials: 'omit', // include, *same-origin, omit
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        redirect: 'error',
-        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-        body: JSON.stringify(region) 
-      })
-
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(response.statusText);
-        }
-        alert('Success:', response);
-      })
-      .catch((error) => {
-        alert('Error:', error);
-      });
+    save() {
+      this.$store.dispatch('saveRegion')
     },
     reset() {
-      this.$store.commit('updateName','')
-      this.$store.commit('updateYearFrom','')
-      this.$store.commit('updateYearTo','')
-      this.$store.commit('updateKnownAs','')
-      this.$store.commit('updateSource','')
-      this.$store.commit('updateOverlayUrl','')
-      this.$store.commit('updateOverlayC1Lat',0.0)
-      this.$store.commit('updateOverlayC1Lng',0.0)
-      this.$store.commit('updateOverlayC2Lat',0.0)
-      this.$store.commit('updateOverlayC2Lng',0.0)
-      this.$store.commit('updateNote','')
-      this.$store.commit('updateLabelLat',0.0)
-      this.$store.commit('updateLabelLng',0.0)
-      this.$store.commit('updateGeometry',null)
-      this.$store.dispatch('removeOverlay')
-    },
-    prev() {
-      const years = [...document.querySelectorAll('#yearList option')].map( option => option.value)
-      const curr = years.indexOf(this.yearFrom)
-
-      if (curr > 0) {
-        this.$store.commit('updateYearFrom',years[curr-1])
-      }
-    },
-    next() {
-      const years = [...document.querySelectorAll('#yearList option')].map( option => option.value)
-      const curr = years.indexOf(this.yearFrom)
-
-      if (curr + 1 < years.length) {
-        this.$store.commit('updateYearFrom',years[curr+1])
-      }
+      this.$store.commit('resetRegion')
     },
     async remove() {
 
@@ -410,6 +231,42 @@ export default {
 </script>
 
 <style scoped>
+
+/* ------------------ reset -------------- */
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  box-sizing: border-box;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+  position: relative;
+  font-family: system-ui, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji";
+  min-height: 100%;
+}
+body {
+  position: relative;
+  min-height: 100vh;
+  font-size: 100%;
+  line-height: 1.5;
+}
+
+input,
+textarea,
+button {
+  font-size: inherit;
+  font-family: inherit;
+}
+
+/* ------------------ /reset -------------- */
+
 .sidebar {
   height: 100%;
   width: 100%;
@@ -442,7 +299,7 @@ label {
 input, label, textarea, button {
     display: block;
     font-family: Avenir, Helvetica, Arial, sans-serif;
-    font-size: large;
+    /* font-size: large; */
 }
 
 input, textarea, button {
