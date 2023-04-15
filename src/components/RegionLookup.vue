@@ -82,35 +82,20 @@ export default {
       }
     },
     regionLookupName() {
-      console.log('region lookup name')
-      if (this.regionLookupName == "") {
-        this.regionLookupYear = ""
-        if (this.nameExists) {
-          console.log('lookup name reset 1')
-          this.$store.commit('resetRegion')
-          this.nameExists = false
-          this.yearExists = false
-        }
+      this.$store.commit('updateName',this.regionLookupName)
+      const region = this.$store.state.regions[this.regionLookupName.toLowerCase()]
+      if (region) {
+        this.nameExists = true
+        this.yearExists = true
+        this.regionLookupYear = Object.keys(region)[0]
+        this.$store.commit('setRegion',{name: this.regionLookupName.toLowerCase(),year:this.regionLookupYear})
       } else {
-        const region = this.$store.state.regions[this.regionLookupName.toLowerCase()]
-        console.log(this.regionLookupName,region)
-        if (region) {
-          this.nameExists = true
-          this.yearExists = true
-          this.regionLookupYear = Object.keys(region)[0]
-          this.$store.commit('setRegion',{name: this.regionLookupName.toLowerCase(),year:this.regionLookupYear})
-        } else {
-          if (this.nameExists) {
-            console.log('lookup name reset 2')
-            this.$store.commit('resetRegion')
-            this.nameExists = false
-            this.yearExists = false
-          }
-        }
+        this.nameExists = false
+        this.yearExists = false
       }
     },
     regionLookupYear() {
-      console.log('region lookup year')
+      this.$store.commit('updateYearFrom',this.regionLookupYear)
       if (this.nameExists) {
         const region = this.$store.state.regions[this.regionLookupName.toLowerCase()]
         if (region) {
@@ -120,16 +105,11 @@ export default {
             this.$store.commit('setRegion',{name:this.regionLookupName.toLowerCase(),year:this.regionLookupYear})
           } else {
             this.yearExists = false
-            console.log('lookup year reset 1')
-            this.$store.commit('resetRegion')
           }
         } else {
           this.yearExists = false
-          console.log('lookup year reset 2')
-          this.$store.commit('resetRegion')
         }
       }
-      // console.log(this.regionLookupName,this.regionLookupYear)
     }
   },
   methods: {

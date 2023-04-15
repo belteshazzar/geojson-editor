@@ -4,7 +4,14 @@
     <div id="slider">
       <div id="yearText" v-text="yearText"></div>
       <div><input type="range" min="-3500" max="2020" step="1" v-model="index" /></div>
-      <div><label for="showCities">Show Cities: </label><input type="checkbox" id="showCities" v-model="cities" /></div>
+      <div>
+        <label for="showCities">Show Continents: </label>
+        <input type="checkbox" v-model="continents" />
+        <label for="showCities">Show Cities: </label>
+        <input type="checkbox" v-model="cities" />
+        <label for="showRivers">Show Rivers: </label>
+        <input type="checkbox" v-model="rivers" />
+      </div>
     </div>
   </div>
 </template>
@@ -27,6 +34,7 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 import '@geoman-io/leaflet-geoman-free';  
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
 import union from '@turf/union'
+import inside from '@turf/boolean-point-in-polygon'
 
 //import 'leaflet-distortableimage'
 
@@ -111,7 +119,7 @@ function createMap (store) {
       corner1.lng = e.latlng.lng
       bounds = L.latLngBounds(corner1,corner2)
       overlay.setBounds(bounds)
-      store.commit('updateOverlayC1',corner1.lat,corner1.lng)
+      store.commit('updateOverlayC1',{lat:corner1.lat,lng:corner1.lng})
      })
      m1.addTo(map);
      m1._icon.classList.add("huechange2")
@@ -126,7 +134,7 @@ function createMap (store) {
       bounds = L.latLngBounds(corner1,corner2)
       overlay.setBounds(bounds)
 
-      store.commit('updateOverlayC2',corner2.lat,corner2.lng)
+      store.commit('updateOverlayC2',{lat:corner2.lat,lng:corner2.lng})
   
      })
      m2.addTo(map);
@@ -139,8 +147,8 @@ function createMap (store) {
       });
       map.addLayer(overlay);
     
-     store.commit('updateOverlayC1',corner1.lat,corner1.lng)
-     store.commit('updateOverlayC2',corner2.lat,corner2.lng)
+     store.commit('updateOverlayC1',{lat:corner1.lat,lng:corner1.lng})
+     store.commit('updateOverlayC2',{lat:corner2.lat,lng:corner2.lng})
 
     }
   })
@@ -210,6 +218,8 @@ function createMap (store) {
   map.on('zoomend', function (e) {
     console.log(e)
   })
+
+  drawnItems.on('pm:update', convertToMultiPolygons)
 
   map.on('pm:create', function (e) {
     console.log('pm:create')
@@ -416,7 +426,9 @@ export default {
   data() {
     return {
       index: 0,
-      cities: 0
+      cities: false,
+      continents: false,
+      rivers: false,
     }
   },
   mounted () {
@@ -506,6 +518,11 @@ console.log('regions updated')
               const layer = L.geoJSON(region[year])
               layer.pm.setOptions({ allowEditing: false })
               layer._name = name
+              if (name.startsWith('continent - ')) {
+                layer.setStyle({fillColor: '#00FF00',stroke: false});
+              } else {
+                layer.setStyle({fillColor: '#0000FF'});
+              }
               layer._from = region[year].properties.year.from
               layer._to = region[year].properties.year.to
               layer.on('click',function(ev) {
@@ -515,12 +532,29 @@ console.log('regions updated')
                   if (geom1==null) {
                     store.commit('updateGeometry',geom2)
                   } else {
-                    var u = union(geom1, geom2);
-                    store.commit('updateGeometry',u.geometry)
+                    const ll = {type:'Point',coordinates:[ev.latlng.lng,ev.latlng.lat]}
+                    console.log(geom1,geom2)
+                    if (geom2.type == 'MultiPolygon') {
+                      console.log('click on multi polygon')
+                      console.log(ll)
+                      for (var i=0 ; i<geom2.coordinates.length ; i++) {
+                        const coords = geom2.coordinates[i]
+                        var poly={'type':'Polygon','coordinates':coords};
+                        console.log(inside(ll,poly))
+                        if (inside(ll,poly)) {
+                          let u = union(geom1, poly);
+                          store.commit('updateGeometry',u.geometry)
+                          break
+                        }
+                      }
+                    } else if (geom2.type == 'Polygon') {
+                      let u = union(geom1, geom2);
+                      store.commit('updateGeometry',u.geometry)
+                    }
                   }
                 } else {
                   try {
-                  store.commit('setRegion',{name,year})
+                  store.commit('setRegion',{name:name,year:year})
                   } catch (e) {
                     console.log(e)
                   }
@@ -599,6 +633,14 @@ console.log('regions updated')
       console.log('cities')
       this.updateVisibility()
     },
+    rivers() {
+      console.log('rivers')
+      this.updateVisibility()
+    },
+    continents() {
+      console.log('continents')
+      this.updateVisibility()
+    },
     name () {
       modifyRegionLabel(this.$store)
     },
@@ -665,10 +707,14 @@ console.log('regions updated')
     updateVisibility() {
 
       const regionKey = `${this.$store.getters.region.properties.name}-${this.$store.getters.region.properties.year.from}`
+      const showContinents = this.continents
 
       regionsLayer.eachLayer((layer) => {
 
           const name = layer._name
+          if (!showContinents && name.startsWith('continent - ')) {
+            regionsLayer.removeLayer(layer)
+          }
           const from = layer._from
           const to = layer._to
           const key = `${name}-${from}`
@@ -681,6 +727,7 @@ console.log('regions updated')
       for ( const k in regionLayers) {
         const layer = regionLayers[k]
         const name = layer._name
+        if (!showContinents && name.startsWith('continent - ')) continue
         const from = layer._from
         const to = layer._to
         const key = `${name}-${from}`

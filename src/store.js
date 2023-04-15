@@ -42,7 +42,7 @@ export const store = createStore({
       state.region = state.regions[name][year]
     },
     resetRegion: function(state) {
-      console.log('reset')
+      console.log('reset region')
       state.region = {
         type: 'Feature',
         properties: {
