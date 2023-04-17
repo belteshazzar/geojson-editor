@@ -1,31 +1,38 @@
 <template>
-
-  <label class="left" for="region-lookup-name">Name: </label>
-  <span class="left2">
-    <input 
-      type="search" 
-      list="nameList" 
-      v-model="regionLookupName" 
-      autocomplete="off" 
-      id="name" 
-      :class="nameExists ? '' : 'not-exists'" />
-  </span>
-  <datalist id="nameList">
-    <option></option>
-    <option v-for="regionName in regionNames" :key="regionName">{{ regionName }}</option>
-  </datalist>
-
-  <label class="left" for="region-lookup-year">Year: </label>
-  <span class="left2">
-    <input type="search" list="yearList" v-model="regionLookupYear" autocomplete="off" id="region-lookup-year" :class="yearExists ? '' : 'not-exists'">
-    <button id="prev" name="prev" @click="prev" :disabled="!yearExists">prev</button>
-    <button id="next" name="next" @click="next" :disabled="!yearExists">next</button>
-  </span>
-  <datalist id="yearList">
-    <option></option>
-    <option v-for="regionYear in regionYears" :key="regionYear">{{ regionYear }}</option>
-  </datalist>
-
+  <table class="region-lookup">
+    <tr>
+      <td colspan="2">Region Lookup</td>
+    </tr>
+    <tr>
+      <td><label for="region-lookup-name">Name: </label></td>
+      <td>
+        <input 
+          type="search" 
+          list="nameList" 
+          v-model="regionLookupName" 
+          autocomplete="off" 
+          id="name" 
+          :class="nameExists ? '' : 'not-exists'" />
+        <datalist id="nameList">
+          <option></option>
+          <option v-for="regionName in regionNames" :key="regionName">{{ regionName }}</option>
+        </datalist>
+      </td>
+    </tr>
+    <tr>
+      <td><label for="region-lookup-year">Year: </label></td>
+      <td>
+        <button id="prev" name="prev" @click="prev" :disabled="!prevYearExists">prev</button>
+        <input type="search" list="yearList" v-model="regionLookupYear" autocomplete="off" id="region-lookup-year" :class="yearExists ? '' : 'not-exists'">
+        <button id="load" name="load" @click="load" :disabled="!yearExists">load</button>
+        <button id="next" name="next" @click="next" :disabled="!nextYearExists">next</button>
+        <datalist id="yearList">
+          <option></option>
+          <option v-for="regionYear in regionYears" :key="regionYear">{{ regionYear }}</option>
+        </datalist>
+      </td>
+    </tr>
+  </table>
 </template>
 
 <script>
@@ -35,28 +42,10 @@ export default {
   data() {
     return {
       regionLookupName: "",
-      nameExists: false,
-      regionLookupYear: "",
-      yearExists: false,
+      regionLookupYear: ""
     }
   },
   computed: {
-    // name: {
-    //   get () {
-    //     return this.$store.state.region.properties.name
-    //   },
-    //   set (value) {
-    //     this.$store.commit('updateName', value)
-    //   }
-    // },
-    // yearFrom: {
-    //   get () {
-    //     return this.$store.state.region.properties.year.from
-    //   },
-    //   set (value) {
-    //     this.$store.commit('updateYearFrom', value)
-    //   }
-    // },
     regionNames: {
       get () {
         return Object.keys(this.$store.state.regions)
@@ -69,67 +58,51 @@ export default {
         if (!region) return []
         return Object.keys(region)
       }
-    }
-  },
-  watch: {
-    '$store.state.region': {
-      handler: function() {
-        this.regionLookupName = this.$store.state.region.properties.name
-        this.regionLookupYear = this.$store.state.region.properties.year.from
-        this.nameExists = this.regionLookupName != ''
-        this.yearExists = this.regionLookupYear != ''
-        console.log('region updated',this.regionLookupName,this.regionLookupYear,this.nameExists,this.yearExists)
+    },
+    nameExists: {
+      get() {
+        return this.$store.state.regions[this.regionLookupName.toLowerCase()]
       }
     },
-    regionLookupName() {
-      this.$store.commit('updateName',this.regionLookupName)
-      const region = this.$store.state.regions[this.regionLookupName.toLowerCase()]
-      if (region) {
-        this.nameExists = true
-        this.yearExists = true
-        this.regionLookupYear = Object.keys(region)[0]
-        this.$store.commit('setRegion',{name: this.regionLookupName.toLowerCase(),year:this.regionLookupYear})
-      } else {
-        this.nameExists = false
-        this.yearExists = false
+    yearExists: {
+      get() {
+        return this.nameExists && this.$store.state.regions[this.regionLookupName.toLowerCase()][this.regionLookupYear];
       }
     },
-    regionLookupYear() {
-      this.$store.commit('updateYearFrom',this.regionLookupYear)
-      if (this.nameExists) {
-        const region = this.$store.state.regions[this.regionLookupName.toLowerCase()]
-        if (region) {
-          const year = region[this.regionLookupYear]
-          if (year) {
-            this.yearExists = true
-            this.$store.commit('setRegion',{name:this.regionLookupName.toLowerCase(),year:this.regionLookupYear})
-          } else {
-            this.yearExists = false
-          }
-        } else {
-          this.yearExists = false
-        }
+    prevYearExists: {
+      get() {
+        if (!this.nameExists || !this.yearExists) return false
+        const years = Object.keys(this.$store.state.regions[this.regionLookupName.toLowerCase()])
+        const curr = years.indexOf(this.regionLookupYear.toLowerCase())
+        return (curr + 1 < years.length)
+      }
+    },
+    nextYearExists: {
+      get() {
+        if (!this.nameExists || !this.yearExists) return false
+        const years = Object.keys(this.$store.state.regions[this.regionLookupName.toLowerCase()])
+        const curr = years.indexOf(this.regionLookupYear.toLowerCase())
+        return (curr > 0)
       }
     }
   },
   methods: {
     prev() {
-      if (!this.nameExists || !this.yearExists) return
-      const years = Object.keys(this.$store.state.regions[this.regionLookupName])
-      const curr = years.indexOf(this.regionLookupYear)
+      const years = Object.keys(this.$store.state.regions[this.regionLookupName.toLowerCase()])
+      const curr = years.indexOf(this.regionLookupYear.toLowerCase())
 
-      if (curr > 0) {
-        this.regionLookupYear = years[curr-1]
-      }
+      this.regionLookupYear = years[curr+1]
+      this.$store.commit('setRegion',{name:this.regionLookupName.toLowerCase(),year:this.regionLookupYear})
+    },
+    load() {
+      this.$store.commit('setRegion',{name:this.regionLookupName.toLowerCase(),year:this.regionLookupYear})
     },
     next() {
-      if (!this.nameExists || !this.yearExists) return
-      const years = Object.keys(this.$store.state.regions[this.regionLookupName])
-      const curr = years.indexOf(this.regionLookupYear)
+      const years = Object.keys(this.$store.state.regions[this.regionLookupName.toLowerCase()])
+      const curr = years.indexOf(this.regionLookupYear.toLowerCase())
 
-      if (curr + 1 < years.length) {
-        this.regionLookupYear = years[curr+1]
-      }
+      this.regionLookupYear = years[curr-1]
+      this.$store.commit('setRegion',{name:this.regionLookupName.toLowerCase(),year:this.regionLookupYear})
     }
   }
 }
@@ -173,6 +146,11 @@ button {
 
 /* ------------------ /reset -------------- */
 
+.region-lookup {
+  width: 100%;
+  background-color: lightgoldenrodyellow;
+  padding: 5px;
+}
 
 .left {
     float: left;

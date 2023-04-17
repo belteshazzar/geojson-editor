@@ -37,6 +37,7 @@ export const store = createStore({
       state.regionsSize++
     },
     setRegion(state,{name,year}) {
+      console.log('set region',name,year)
       if (state.regionEdited) return
       console.log('set region')
       state.region = state.regions[name][year]

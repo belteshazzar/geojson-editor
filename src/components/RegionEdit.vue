@@ -4,6 +4,14 @@
 
 
     <div class="sidebar-half">
+      <label for="name">Name: </label>
+      <input type="text" id="name" name="name" v-model="name"/>
+    </div>
+    <div class="sidebar-half">
+      <label for="yearFrom">Year From: </label>
+      <input type="text" id="yearFrom" name="yearFrom" v-model="yearFrom"/>
+    </div>
+    <div class="sidebar-half">
       <label for="known-as">Known As: </label>
       <input type="text" id="known-as" name="known-as" v-model="knownAs"/>
     </div>

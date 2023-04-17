@@ -192,7 +192,7 @@ function createMap (store) {
     dragMode: false,
     cutPolygon: false,
     rotateMode: false,  
-    removalMode: false,
+    // removalMode: false,
   });
 
   // map.addControl(new L.Control.Draw({
@@ -220,6 +220,8 @@ function createMap (store) {
   })
 
   drawnItems.on('pm:update', convertToMultiPolygons)
+
+  map.on('pm:remove', convertToMultiPolygons)
 
   map.on('pm:create', function (e) {
     console.log('pm:create')
@@ -269,17 +271,20 @@ function createMap (store) {
   });
 
   function convertToPolygons() {
+    console.log('convert to polygons')
+
     drawnItems.clearLayers();
     const region = store.getters.region
 
     if (region.geometry == null) return
 
     if (region.geometry.type == 'Polygon') {
-      console.log(drawnItems.addData(region))
+      console.log('add polygon',drawnItems.addData(region))
     } else if (region.geometry.type == 'MultiPolygon') {
 
       region.geometry.coordinates.forEach((coords) => {
-        drawnItems.addData({
+
+        const l = drawnItems.addData({
           type : 'Feature',
           properties: {},
           geometry: {
@@ -287,6 +292,9 @@ function createMap (store) {
             coordinates: coords
           }
         })
+
+        console.log('add polygon',l)
+
       })
     } else {
       console.error('only polygon and multipolygon supported')
@@ -392,7 +400,41 @@ function modifyRegionGeometry (store) {
     return
   }
 
-  drawnItems.addData(region)
+  console.log('modify region geometry')
+
+  function convertToPolygons() {
+    console.log('convert to polygons')
+
+    drawnItems.clearLayers();
+    const region = store.getters.region
+
+    if (region.geometry == null) return
+
+    if (region.geometry.type == 'Polygon') {
+      console.log('add polygon',drawnItems.addData(region))
+    } else if (region.geometry.type == 'MultiPolygon') {
+
+      region.geometry.coordinates.forEach((coords) => {
+
+        const l = drawnItems.addData({
+          type : 'Feature',
+          properties: {},
+          geometry: {
+            type: 'Polygon',
+            coordinates: coords
+          }
+        })
+
+        console.log('add polygon',l)
+
+      })
+    } else {
+      console.error('only polygon and multipolygon supported')
+      return
+    }
+  }
+  convertToPolygons()
+  // drawnItems.addData(region)
 }
 
 // function loadOverlay() {
@@ -488,6 +530,7 @@ export default {
     },
     geometry: {
       get () {
+        console.log('geometry updated')
         return this.$store.state.region.geometry
       }
     }
@@ -496,6 +539,7 @@ export default {
     '$store.state.region': {
       deep: false,
       handler: function() {
+        console.log('update region')
         this.updateVisibility()
       }
     },
@@ -519,7 +563,7 @@ console.log('regions updated')
               layer.pm.setOptions({ allowEditing: false })
               layer._name = name
               if (name.startsWith('continent - ')) {
-                layer.setStyle({fillColor: '#00FF00',stroke: false});
+                layer.setStyle({fillColor: '#00FF00'});
               } else {
                 layer.setStyle({fillColor: '#0000FF'});
               }
@@ -533,7 +577,9 @@ console.log('regions updated')
                     store.commit('updateGeometry',geom2)
                   } else {
                     const ll = {type:'Point',coordinates:[ev.latlng.lng,ev.latlng.lat]}
-                    console.log(geom1,geom2)
+
+                    console.log('shift click',geom1,geom2)
+
                     if (geom2.type == 'MultiPolygon') {
                       console.log('click on multi polygon')
                       console.log(ll)
@@ -795,24 +841,27 @@ console.log('regions updated')
 </script>
 
 <style>
-  .geo {
-    width: 100%;
-    height: 100%;
-  }
 
-  #map {
-    height: 100%;
-    width: 100%;
-  }
+.geo {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
 
-  img.huechange { filter: hue-rotate(120deg); }
-  img.huechange2 { filter: hue-rotate(240deg); }
+#map {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+}
 
-  #slider {
+img.huechange { filter: hue-rotate(120deg); }
+img.huechange2 { filter: hue-rotate(240deg); }
+
+#slider {
   position: absolute;
   bottom: 20px;
   left: 50px;
-  width: calc(70vw - 100px);
+  width: calc(100% - 100px);
   z-index: 1000;
 }
 
