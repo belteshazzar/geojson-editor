@@ -8,16 +8,23 @@
       <input type="text" id="name" name="name" v-model="name"/>
     </div>
     <div class="sidebar-half">
-      <label for="yearFrom">Year From: </label>
-      <input type="text" id="yearFrom" name="yearFrom" v-model="yearFrom"/>
-    </div>
-    <div class="sidebar-half">
       <label for="known-as">Known As: </label>
       <input type="text" id="known-as" name="known-as" v-model="knownAs"/>
     </div>
-    <div class="sidebar-half">
-      <label for="yearTo">Year To: </label>
-      <input type="text" id="yearTo" name="yearTo" v-model="yearTo"/>
+
+    <div class="sidebar-25">
+      <label for="prevYear">Previous Year: </label>
+      <button id="prevYear" name="prevYear" @click="loadPrevious">{{ yearPrevious }}</button>
+    </div>
+    <div class="sidebar-25">
+      <label for="year">Year: </label>
+      <input type="text" id="year" name="year" v-model="year"/>
+    </div>
+    <div class="sidebar-25">
+      <label for="nextYear">Next Year: </label>
+      <button id="nextYear" name="nextYear" @click="loadNext">{{ yearNext }}</button>
+    </div>
+    <div class="sidebar-25">
     </div>
 
     <div class="sidebar-half">
@@ -93,20 +100,22 @@ export default {
         this.$store.commit('updateName', value)
       }
     },
-    yearFrom: {
+    year: {
       get () {
-        return this.$store.state.region.properties.year.from
+        return this.$store.state.region.properties.year
       },
       set (value) {
-        this.$store.commit('updateYearFrom', value)
+        this.$store.commit('updateYear', Number.parseInt(value))
       }
     },
-    yearTo: {
-      get () {
-        return this.$store.state.region.properties.year.to
-      },
-      set (value) {
-        this.$store.commit('updateYearTo', value)
+    yearNext: {
+      get() {
+        return this.$store.state.regionYearNext
+      }
+    },
+    yearPrevious: {
+      get() {
+        return this.$store.state.regionYearPrevious
       }
     },
     knownAs: {
@@ -138,7 +147,7 @@ export default {
         return this.$store.state.region.properties.overlay.c1.lat
       },
       set (value) {
-        this.$store.commit('updateOverlayC1Lat', value)
+        this.$store.commit('updateOverlayC1Lat', Number.parseFloat(value))
       }
     },
     overlayC1Lng: {
@@ -146,7 +155,7 @@ export default {
         return this.$store.state.region.properties.overlay.c1.lng
       },
       set (value) {
-        this.$store.commit('updateOverlayC1Lng', value)
+        this.$store.commit('updateOverlayC1Lng', Number.parseFloat(value))
       }
     },
     overlayC2Lat: {
@@ -154,7 +163,7 @@ export default {
         return this.$store.state.region.properties.overlay.c2.lat
       },
       set (value) {
-        this.$store.commit('updateOverlayC2Lat', value)
+        this.$store.commit('updateOverlayC2Lat', Number.parseFloat(value))
       }
     },
     overlayC2Lng: {
@@ -162,7 +171,7 @@ export default {
         return this.$store.state.region.properties.overlay.c2.lng
       },
       set (value) {
-        this.$store.commit('updateOverlayC2Lng', value)
+        this.$store.commit('updateOverlayC2Lng', Number.parseFloat(value))
       }
     },
     note: {
@@ -178,7 +187,7 @@ export default {
         return this.$store.getters.region.properties.label.lat
       },
       set (value) {
-        this.$store.commit('updateLabel', {lat:value,lng:this.$store.region.properties.label.lng})
+        this.$store.commit('updateLabel', {lat:Number.parseFloat(value),lng:this.$store.region.properties.label.lng})
       }
     },
     labelLng: {
@@ -186,7 +195,7 @@ export default {
         return this.$store.state.region.properties.label.lng
       },
       set (value) {
-        this.$store.commit('updateLabel', {lat: this.$store.state.region.properties.label.lat, lng: value})
+        this.$store.commit('updateLabel', {lat: this.$store.state.region.properties.label.lat, lng: Number.parseFloat(value)})
       }
     },
     geometry: {
@@ -208,30 +217,14 @@ export default {
     reset() {
       this.$store.commit('resetRegion')
     },
-    async remove() {
-
-      const that = this;
-      const region = this.$store.getters.region
-
-      await fetch(`http://localhost:3000/regions/${region.properties.name}/${region.properties.year.from}`,{
-        method: 'DELETE',
-        mode: 'cors', // no-cors, *cors, same-origin
-        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-        credentials: 'omit', // include, *same-origin, omit
-        redirect: 'error',
-        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-      })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(response.statusText);
-        }
-        alert('Success:', response);
-        that.reset()
-      })
-      .catch((error) => {
-        alert(error.message);
-      });
-
+    remove() {
+      this.$store.dispatch('deleteRegion')
+    },
+    loadPrevious() {
+      // this.$store.commit('setRegion',{name:this.regionLookupName.toLowerCase(),year:this.regionLookupYear})
+    },
+    loadNext() {
+      // this.$store.commit('setRegion',{name:this.regionLookupName.toLowerCase(),year:this.regionLookupYear})
     }
   }
 }
@@ -291,6 +284,11 @@ button {
 
 .sidebar-half {
   width: 50%;
+  float: left;
+}
+
+.sidebar-25 {
+  width: 25%;
   float: left;
 }
 

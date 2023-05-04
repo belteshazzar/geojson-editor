@@ -1,17 +1,15 @@
 const extractFrames = require('ffmpeg-extract-frames')
- 
-// extract 3 frames at 1s, 2s, and 3.5s respectively
+
+const ms = Number.parseInt(process.argv[2])
+const m = Math.floor(ms / (60*1000))
+const s = ms / 1000 - m*60
+
+const ts = `${m<10?'0':''}${m}-${s<10?'0':''}${s}` // timestamp
+
 extractFrames({
-    input: '/Users/daniel/empiresX.mov',
-    output: './screenshot-%i.jpg',
-    offsets: [
-        1000,
-        2000,
-        3500
-    ]
-    })
-    
-    // generated screenshots:
-    // ./screenshot-1.jpg
-    // ./screenshot-2.jpg
-    // ./screenshot-3.jpg
+    input: 'video.mov',
+    output: `./screenshot-${ts}.png`,
+    offsets: [ ms ]
+})
+
+console.log(`${ms} = ${ts}`)

@@ -3,7 +3,15 @@
     <div id="map" />
     <div id="slider">
       <div id="yearText" v-text="yearText"></div>
-      <div><input type="range" min="-3500" max="2020" step="1" v-model="index" /></div>
+      <div>
+        <button @click="index = index*1 - 100">-100</button>
+        <button @click="index = index*1 - 10">-10</button>
+        <button @click="index = index*1 - 1">-1</button>
+        <input type="range" min="-3500" max="2020" step="1" v-model="index" />
+        <button @click="index = index*1 + 1">+1</button>
+        <button @click="index = index*1 + 10">+10</button>
+        <button @click="index = index*1 + 100">+100</button>
+      </div>
       <div>
         <label for="showCities">Show Continents: </label>
         <input type="checkbox" v-model="continents" />
@@ -46,9 +54,106 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow
 })
 
+var createPixelGIF = (function() {
+
+  var keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+  return function createPixelGIF(hexColor) {
+    return "data:image/gif;base64,R0lGODlhAQABAPAA" + encodeHex(hexColor) + "/yH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==";
+  }
+
+  function encodeHex(hexColor) {
+    var rgb;
+    if (typeof hexColor == 'string') {
+      var s = hexColor.substring(1, 7);
+      if (s.length < 6) s = s[0] + s[0] + s[1] + s[1] + s[2] + s[2];
+      rgb = [parseInt(s[0] + s[1], 16), parseInt(s[2] + s[3], 16), parseInt(s[4] + s[5], 16)];
+    } else
+      rgb = [(hexColor & (0xFF << 16)) >> 16, (hexColor & (0xFF << 8)) >> 8, hexColor & 0xFF];
+
+    return encodeRGB(rgb[0], rgb[1], rgb[2]);
+  }
+
+  function encodeRGB(r, g, b) {
+    return encode_triplet(0, r, g) + encode_triplet(b, 255, 255);
+  }
+
+  function encode_triplet(e1, e2, e3) {
+    let enc1 = e1 >> 2;
+    let enc2 = ((e1 & 3) << 4) | (e2 >> 4);
+    let enc3 = ((e2 & 15) << 2) | (e3 >> 6);
+    let enc4 = e3 & 63;
+    return keyStr.charAt(enc1) + keyStr.charAt(enc2) + keyStr.charAt(enc3) + keyStr.charAt(enc4);
+  }
+
+})()
+
+const C_GREEK = "#ff33e4" // pink
+const C_SYRO_HITTITE = '#14ff20' // bright green
+const C_GULF = '#fbff00' // bright yellow
+const C_EGYPT = '#d9bf30' // gold
+const C_CHINA = '#a80c0c' // dark red
+const C_ARABIA= '#f5e97d' // sandy
+
+const colors = {
+  aramea: C_GULF,
+  arzawa: C_SYRO_HITTITE,
+  assyria: '#031194', // blue
+  babylonia: '#a61d1b', // red
+  canaan: '#9c4c27',
+  colchis: C_SYRO_HITTITE,
+  dilmun: C_GULF,
+  egypt: C_EGYPT,
+  elam: '#2c7332', // dark green
+  epirus: C_GREEK,
+  'greek-state': C_GREEK,
+  'greek-state-a': C_GREEK,
+  'greek-state-gg': C_GREEK,
+  hittites: '#ab6605', // orange brown
+  hyksos: C_EGYPT,
+  'kingdom of kush': C_EGYPT,
+  lycia: C_SYRO_HITTITE,
+  'lower egypt': C_EGYPT,
+  magan: C_GULF,
+  minoan: '#804200',
+  mycenae: C_GREEK,
+  mitanni: '#ffa200', // bright orange
+  nubia: C_EGYPT,
+  phoenicia: '#6e4229', // brown
+  phrygia: C_SYRO_HITTITE,
+  punt: C_EGYPT, // gold
+  saba: C_ARABIA,
+  shang: C_CHINA,
+  syria: C_SYRO_HITTITE,
+  tabal: '#14ff20', // fluro green
+  ugarit: C_SYRO_HITTITE,
+  'upper egypt': C_EGYPT,
+  uratu: '#ff9500', // bright orange
+  xia: C_CHINA,
+  xios: C_EGYPT,
+  zhou: C_CHINA
+}
+
+var cityIcon = L.icon({
+    iconUrl: createPixelGIF(0xff0000),
+    // shadowUrl: 'leaf-shadow.png',
+
+    iconSize:     [3, 3], // size of the icon
+    // shadowSize:   [50, 64], // size of the shadow
+    iconAnchor:   [1, 1], // point of the icon which will correspond to marker's location
+    // shadowAnchor: [4, 62],  // the same for the shadow
+    popupAnchor:  [0, 0] // point from which the popup should open relative to the iconAnchor
+});
+
 let map = null
+let continentsLayer = null
+let continentLayers = {}
 let regionsLayer = null
 let regionLayers = {}
+let citiesLayer = null
+let cityLayers = {}
+let riversLayer = null
+let riverLayers = {}
 
 // let rivers = L.layerGroup()
 // let cities = L.layerGroup()
@@ -63,13 +168,318 @@ var bounds = null
 var m1 = null
 var m2 = null
 
-function createMap (store) {
+// overlay
+var xoverlay = null
+var xcorner1 = null
+var xcorner2 = null
+var xbounds = null
+var xm1 = null
+var xm2 = null
+
+function debounce(cb, delay = 250) {
+  let timeout
+
+  return (...args) => {
+    clearTimeout(timeout)
+    timeout = setTimeout(() => {
+      cb(...args)
+    }, delay)
+  }
+}
+
+// layer._from = geojson.properties.year
+//       layer._to = nextGeoJson == null ? Number.POSITIVE_INFINITY : nextGeoJson.properties.year - 1
+
+function createLayer(store, geojson) {
+
+  let layer = L.geoJSON(geojson)
+  layer.pm.setOptions({ allowEditing: false })
+  layer._name = geojson.properties.name.toLowerCase()
+  layer._geojson = geojson
+
+  let color = colors[`${layer._name}`]
+
+  if (color) {
+    layer.setStyle({fillColor: color, color: color});
+  } else {
+    layer.setStyle({fillColor: '#0000FF', color: '#0000FF'});
+  }
+
+  layer.on('click',function(ev) {
+    if (ev.originalEvent.shiftKey) {
+      const geom1 = store.state.region.geometry
+      const geom2 = geojson.geometry
+      if (geom1==null) {
+        store.commit('updateGeometry',geom2)
+      } else {
+        const ll = {type:'Point',coordinates:[ev.latlng.lng,ev.latlng.lat]}
+
+        console.log('shift click',geom1,geom2)
+
+        if (geom2.type == 'MultiPolygon') {
+          console.log('click on multi polygon')
+          console.log(ll)
+          for (var i=0 ; i<geom2.coordinates.length ; i++) {
+            const coords = geom2.coordinates[i]
+            var poly={'type':'Polygon','coordinates':coords};
+            console.log(inside(ll,poly))
+            if (inside(ll,poly)) {
+              let u = union(geom1, poly);
+              store.commit('updateGeometry',u.geometry)
+              break
+            }
+          }
+        } else if (geom2.type == 'Polygon') {
+          let u = union(geom1, geom2);
+          store.commit('updateGeometry',u.geometry)
+        }
+      }
+    } else {
+      store.commit('setRegion',{name: layer._name,year:layer._from})
+    }
+  });
+
+  return layer
+}
+
+const riversUpdated = debounce((component) => {
+  const store = component.$store
+
+  for (const name of Object.keys(store.state.rivers)) {
+    let layer = riverLayers[name]
+    if (!layer) {
+      const geojson = store.state.rivers[name]
+      layer = L.geoJSON(geojson)
+      layer.pm.setOptions({ allowEditing: false })
+      layer._name = name
+      layer._geojson = geojson
+            layer.setStyle({weight: 2})
+            // layer._river = river
+            layer.on('click',function() {
+              store.commit('setRiver',geojson)
+            });
+            layer.bindPopup(name);
+            layer.on('mouseover', function () {
+                this.openPopup();
+            });
+            layer.on('mouseout', function () {
+                this.closePopup();
+            });
+    riverLayers[name] = layer
+      riversLayer.addLayer(layer)
+
+
+
+
+    }
+  }
+})
+
+const citiesUpdated = debounce((component) => {
+  const store = component.$store
+
+  for (const name of Object.keys(store.state.cities)) {
+    let layer = cityLayers[name]
+    if (!layer) {
+      const geojson = store.state.cities[name]
+      // layer = L.geoJSON(geojson)
+      // layer.pm.setOptions({ allowEditing: false })
+      // layer._name = name
+      // layer._geojson = geojson
+
+            const marker = L.marker(geojson.geometry.coordinates, {icon: cityIcon})
+            marker._city = geojson
+            marker.on('click',function() {
+              store.commit('setCity',geojson)
+            });
+            marker.bindPopup(name);
+            marker.on('mouseover', function () {
+                this.openPopup();
+            });
+            marker.on('mouseout', function () {
+                this.closePopup();
+            });
+
+
+
+      cityLayers[name] = marker
+      citiesLayer.addLayer(marker)
+    }
+  }
+})
+
+function calculateFromToRegion(region) {
+
+console.log('calculateFromToRegion')
+console.log(region)
+
+  const years = Object.keys(region).map(v => Number.parseInt(v)).sort((a,b) => a - b)
+
+  for (let i=0 ; i<years.length ; i++) {
+    const geojson = region[`${years[i]}`]
+    const name = geojson.properties.name.toLowerCase()
+    if (geojson.geometry == null) continue
+    let layer = regionLayers[name][`${geojson.properties.year}`]
+    const nextGeoJson = i<years.length-1 ? region[`${years[i+1]}`] : null
+    layer._from = geojson.properties.year
+    layer._to = nextGeoJson == null ? Number.POSITIVE_INFINITY : nextGeoJson.properties.year - 1
+
+  }
+
+}
+
+// function calculateFromTo(component) {
+//   console.log('calculateFromTo')
+
+//   const store = component.$store
+
+//   for (const name of Object.keys(store.state.regions)) {
+//     calculateFromToRegion(store.state.regions[name])
+//   }
+
+// }
+
+const regionsUpdated = debounce((component) => {
+
+  console.log('regionsUpdated')
+  // TODO: only adds, should also remove
+  
+  const store = component.$store
+  console.log(component)
+
+  for (const name of Object.keys(store.state.regions)) {
+
+    if (name.startsWith('continent - ')) {
+      let layer = continentLayers[name]
+      if (!layer) {
+        const geojson = store.state.regions[name][Object.keys(store.state.regions[name])[0]]
+        layer = L.geoJSON(geojson)
+        layer.pm.setOptions({ allowEditing: false })
+        layer._name = name
+        layer._geojson = geojson
+        layer.setStyle({fillColor: '#104f05', color: '#104f05'});
+        continentLayers[name] = layer
+        continentsLayer.addLayer(layer)
+      }
+      continue
+    }
+
+    if (!regionLayers[name]) {
+      regionLayers[name] = {}
+    }
+
+    const region = store.state.regions[name]
+    if (!region) {
+      console.error('region ',name,region)
+      continue
+    }
+
+    const years = Object.keys(region).map(v => Number.parseInt(v)).sort((a,b) => a - b)
+
+    for (let i=0 ; i<years.length ; i++) {
+      const geojson = region[`${years[i]}`]
+      if (geojson.geometry == null) continue
+
+      let layer = regionLayers[name][`${geojson.properties.year}`]
+      if (!layer) {
+        layer = createLayer(store,geojson)
+        regionLayers[name][`${geojson.properties.year}`] = layer
+      }
+
+    }
+
+    calculateFromToRegion(region)
+  }
+
+  component.updateVisibility()
+
+},1000)
+
+function regionDeleted(component,geojson) {
+  console.log('regionDeleted: ',geojson.properties.name,geojson.properties.year)
+  const store = component.$store
+  const name = geojson.properties.name.toLowerCase()
+  const year = geojson.properties.year
+
+  let layer = regionLayers[name][`${year}`]
+  if (layer) {
+      regionsLayer.removeLayer(layer)
+      delete regionLayers[name][`${year}`]
+
+      calculateFromToRegion(store.state.regions[name])
+  } else {
+    console.error(`regionDeleted: not found ${geojson.properties.name} @ ${geojson.properties.year}`)
+  }
+
+}
+
+function regionUpdated(component,geojson) {
+  console.log('regionUpdated: ',geojson.properties.name,geojson.properties.year)
+  const store = component.$store
+  const name = geojson.properties.name.toLowerCase()
+  const region = store.state.regions[name]
+
+  if (!region) {
+    console.error(`regionUpdated: name not found ${geojson.properties.name} @ ${geojson.properties.year}`)
+    return
+  }
+
+  const years = Object.keys(region).map(v => Number.parseInt(v)).sort((a,b) => a - b)
+
+  for (let i=0 ; i<years.length ; i++) {
+    if (years[i] == geojson.properties.year) {
+      const geojson = region[`${years[i]}`]
+
+      let layer = regionLayers[name][`${geojson.properties.year}`]
+      if (layer) {
+        regionsLayer.removeLayer(layer)
+      }
+
+      if (geojson.geometry) {
+        regionLayers[name][`${geojson.properties.year}`] = createLayer(store,geojson)
+      }
+      regionsUpdated(component)
+
+      return
+      // if (found) {
+      //   layer._from = geojson.properties.year
+      //   layer._to = nextGeoJson == null ? Number.POSITIVE_INFINITY : nextGeoJson.properties.year - 1
+      //   continue
+      // }
+    }
+  }
+
+  console.error(`regionUpdated: year not found ${geojson.properties.name} @ ${geojson.properties.year}`)
+
+}
+
+function createMap (component) {
 
   // sumer source: https://en.wikipedia.org/wiki/Lugal-zage-si
   // sumer image: https://upload.wikimedia.org/wikipedia/commons/d/dd/Sumer_%28map%29.jpg
 
+  const store = component.$store
+
   store.subscribeAction((action) => {
-    if (action.type == 'removeOverlay') {
+    if (action.type == 'regionsUpdated') {
+      regionsUpdated(component)
+    } else if (action.type == 'regionUpdated') {
+      regionUpdated(component,action.payload)
+    } else if (action.type == 'regionDeleted') {
+      regionDeleted(component,action.payload)
+    } else if (action.type == 'citiesUpdated') {
+      citiesUpdated(component)
+    } else if (action.type == 'riversUpdated') {
+      riversUpdated(component)
+    } else if (action.type == 'xremoveOverlay') {
+      console.log('remove overlay from: ' + action.payload)
+
+      if (xoverlay != null) {
+        map.removeLayer(xoverlay)
+        map.removeLayer(xm1)
+        map.removeLayer(xm2)
+      }
+    } else if (action.type == 'removeOverlay') {
       console.log('remove overlay from: ' + action.payload)
 
       if (overlay != null) {
@@ -77,6 +487,61 @@ function createMap (store) {
         map.removeLayer(m1)
         map.removeLayer(m2)
       }
+    } else if (action.type == 'xloadOverlay') {
+
+      if (xoverlay != null) {
+        map.removeLayer(xoverlay)
+        map.removeLayer(xm1)
+        map.removeLayer(xm2)
+      }
+
+      const imageUrl = action.payload
+
+      if (imageUrl == '') return
+
+      const state = store.getters.xoverlay
+      xcorner1 = L.latLng(state.c1.lat, state.c1.lng)
+      xcorner2 = L.latLng(state.c2.lat, state.c2.lng)
+      xbounds = L.latLngBounds(xcorner1, xcorner2)
+
+     xm1 = new L.Marker(xcorner1,{
+        draggable: true
+     })
+     xm1.on('drag', function(e) {
+      xcorner1.lat = e.latlng.lat
+      xcorner1.lng = e.latlng.lng
+      xbounds = L.latLngBounds(xcorner1,xcorner2)
+      xoverlay.setBounds(xbounds)
+      store.commit('xupdateOverlayC1',{lat:xcorner1.lat,lng:xcorner1.lng})
+     })
+     xm1.addTo(map);
+     xm1._icon.classList.add("huechange2")
+
+     xm2 = new L.Marker(xcorner2,{
+      draggable: true
+     })
+
+     xm2.on('drag', function(e) {
+        xcorner2.lat = e.latlng.lat
+        xcorner2.lng = e.latlng.lng
+        xbounds = L.latLngBounds(xcorner1,xcorner2)
+        xoverlay.setBounds(xbounds)
+
+        store.commit('xupdateOverlayC2',{lat:xcorner2.lat,lng:xcorner2.lng})
+     })
+     xm2.addTo(map);
+     xm2._icon.classList.add("huechange2")
+
+      // map.fitBounds(bounds);
+      xoverlay = new L.ImageOverlay(imageUrl, xbounds, {
+          opacity: 0.7,
+          interactive: true
+      });
+      map.addLayer(xoverlay);
+    
+     store.commit('xupdateOverlayC1',{lat:xcorner1.lat,lng:xcorner1.lng})
+     store.commit('xupdateOverlayC2',{lat:xcorner2.lat,lng:xcorner2.lng})
+
     } else if (action.type == 'loadOverlay') {
       console.log('load overlay from: ' + action.payload)
 
@@ -140,11 +605,58 @@ function createMap (store) {
      m2.addTo(map);
      m2._icon.classList.add("huechange2")
 
-      map.fitBounds(bounds);
+      // map.fitBounds(bounds);
       overlay = new L.ImageOverlay(imageUrl, bounds, {
           opacity: 0.7,
           interactive: true
       });
+      // overlay.on('click',function(e) {
+      //   const offsetX = e.originalEvent.offsetX
+      //   const offsetY = e.originalEvent.offsetY
+      //   const img = e.target._image
+      //   var canvas = document.createElement("canvas");
+      //   canvas.width = img.width;
+      //   canvas.height = img.height;
+      //   var context = canvas.getContext('2d');
+      //   try {
+      //     context.drawImage(img, 0, 0, img.width,img.height );
+      //     const imgData = context.getImageData(0, 0, img.width, img.height)
+      //     const data = imgData.data
+      //     const index = 4*(offsetY * img.width + offsetX)
+      //     const color = [
+      //       data[index],
+      //       data[index + 1],
+      //       data[index + 2],
+      //       data[index + 3]
+      //   ]
+      //     const outline = getOutline(data,offsetX,offsetY,img.width,img.height,color)
+      //     console.log(outline)
+
+      //     data[index] = 255
+      //     data[index + 1] = 0
+      //     data[index + 2] = 0
+      //     data[index + 3] = 255
+
+      //     let coords = []
+      //     outline.forEach(p => {
+      //       const x = p.x
+      //       const y = p.y
+      //       const i = 4*(y * img.width + x)
+      //       data[i]=255
+      //       data[i+1]=0
+      //       data[i+2]=0
+      //       data[i+3]=255
+      //       const ll = map.unproject(L.point(x,y),map.getZoom())
+      //       coords.push([ll.lng,ll.lat])
+      //     })
+      //     store.commit('updateGeometry',{"type":"Polygon","coordinates":[coords]})
+      //     context.putImageData(imgData, 0, 0);
+      //     var base64URI = canvas.toDataURL();
+      //     img.src = base64URI
+      //   } catch (e) {
+      //     console.log(e)
+      //   }
+      // })
       map.addLayer(overlay);
     
      store.commit('updateOverlayC1',{lat:corner1.lat,lng:corner1.lng})
@@ -162,8 +674,14 @@ function createMap (store) {
     maxZoom: 19
   }).addTo(map)
 
+  continentsLayer = L.layerGroup()
+
   regionsLayer = L.layerGroup()
   regionsLayer.addTo(map)
+
+  citiesLayer = L.layerGroup()
+
+  riversLayer = L.layerGroup()
 
   drawnItems = L.geoJSON(null, {
     style: function () {
@@ -467,14 +985,14 @@ export default {
   name: 'LeafletMap',
   data() {
     return {
-      index: 0,
+      // index: -1550,
       cities: false,
       continents: false,
       rivers: false,
     }
   },
   mounted () {
-    createMap(this.$store)
+    createMap(this)
     // console.log(this.$store.state.regions)
     // console.log(this.$store.state.cities)
     // console.log(this.$store.state.rivers)
@@ -483,6 +1001,14 @@ export default {
     
   },
   computed: {
+    index: {
+      get() {
+        return this.$store.state.displayYear
+      },
+      set(v) {
+        this.$store.state.displayYear = v
+      }
+    },
     year: {
       get() {
         return this.index<0 ? this.index*1 : this.index*1+1
@@ -543,149 +1069,132 @@ export default {
         this.updateVisibility()
       }
     },
-    // '$store.state.regions': {
-    '$store.state.regionsSize': {
-      deep: false,
-      handler: function() {
-        // regions updated
-console.log('regions updated')
-        // TODO: only adds, should also remove
-        const store = this.$store
-        const data = store.state.regions
+    // '$store.state.citiesSize': {
+    //   deep: true,
+    //   handler: function() {
+    //     const store = this.$store
+    //     const data = store.state.cities
 
-        for (const name of Object.keys(data)) {
-          const region = data[name]
-          for (const year of Object.keys(region)) {
+    //     for (const name of Object.keys(data)) {
+    //       if (!cityLayers[name]) {
+    //         const city = data[name]
+    //         const marker = L.marker(city.geojson.geometry.coordinates, {icon: cityIcon})
+    //         marker._city = city
+    //         marker.on('click',function() {
+    //           store.commit('setCity',city)
+    //         });
 
-            const key = `${name}-${year}`
-            if (!regionLayers[key]) {
-              const layer = L.geoJSON(region[year])
-              layer.pm.setOptions({ allowEditing: false })
-              layer._name = name
-              if (name.startsWith('continent - ')) {
-                layer.setStyle({fillColor: '#00FF00'});
-              } else {
-                layer.setStyle({fillColor: '#0000FF'});
-              }
-              layer._from = region[year].properties.year.from
-              layer._to = region[year].properties.year.to
-              layer.on('click',function(ev) {
-                if (ev.originalEvent.shiftKey) {
-                  const geom1 = store.state.region.geometry
-                  const geom2 = region[year].geometry
-                  if (geom1==null) {
-                    store.commit('updateGeometry',geom2)
-                  } else {
-                    const ll = {type:'Point',coordinates:[ev.latlng.lng,ev.latlng.lat]}
+    //         marker.bindPopup(city.name);
+    //         marker.on('mouseover', function () {
+    //             this.openPopup();
+    //         });
+    //         marker.on('mouseout', function () {
+    //             this.closePopup();
+    //         });
+    //         cityLayers[name] = marker
+    //       }
+    //     }
 
-                    console.log('shift click',geom1,geom2)
+    //     this.updateVisibility()
+    //   }
+    // },
+    // '$store.state.riversSize': {
+    //   deep: true,
+    //   handler: function() {
+    //     const store = this.$store
+    //     const data = store.state.rivers
 
-                    if (geom2.type == 'MultiPolygon') {
-                      console.log('click on multi polygon')
-                      console.log(ll)
-                      for (var i=0 ; i<geom2.coordinates.length ; i++) {
-                        const coords = geom2.coordinates[i]
-                        var poly={'type':'Polygon','coordinates':coords};
-                        console.log(inside(ll,poly))
-                        if (inside(ll,poly)) {
-                          let u = union(geom1, poly);
-                          store.commit('updateGeometry',u.geometry)
-                          break
-                        }
-                      }
-                    } else if (geom2.type == 'Polygon') {
-                      let u = union(geom1, geom2);
-                      store.commit('updateGeometry',u.geometry)
-                    }
-                  }
-                } else {
-                  try {
-                  store.commit('setRegion',{name:name,year:year})
-                  } catch (e) {
-                    console.log(e)
-                  }
-                }
-              });
-              regionLayers[key] = layer
-            }
-          }
-        }
+    //     for (const name of Object.keys(data)) {
+    //       if (!riverLayers[name]) {
+    //         const river = data[name]
+    //         const layer = L.geoJSON(river.geojson)
+    //         layer.setStyle({weight: 2})
+    //         layer._river = river
+    //         layer.on('click',function() {
+    //           store.commit('setRiver',river)
+    //         });
+    //         layer.bindPopup(name);
+    //         layer.on('mouseover', function () {
+    //             this.openPopup();
+    //         });
+    //         layer.on('mouseout', function () {
+    //             this.closePopup();
+    //         });
 
-        this.updateVisibility()
+    //         riverLayers[name] = layer
+    //       }
+    //     }
 
-            // const nameList = document.getElementById('nameList')
-            // data.regions.forEach(el => {
-            //   const option = document.createElement("option");
-            //   option.value = el
-            //   nameList.appendChild(option);
-            // });
+    //     this.updateVisibility()
+    //   }
+    // },
+    year(y) {
+      this.updateVisibility()
+      this.$store.dispatch('xloadOverlay','/years/' + y + '.png')
+
+      if (y < -2070) {
+        console.log(y,'<-2070')
+        this.$store.commit('xupdateOverlayC1',{
+          lat: -1.4061088354351594,
+          lng: 103.88713137376364
+        })
+        this.$store.commit('xupdateOverlayC2',{
+          lat: 55.57834467218206,
+          lng: -15.292831208745458
+        })
+      } else if (y < -225) {
+        console.log(y,'< -225')
+        this.$store.commit('xupdateOverlayC1',{
+          lat: -17.476432197195518,
+          lng: 141.4990437358201
+        })
+        this.$store.commit('xupdateOverlayC2',{
+          lat: 64.0914075226231,
+          lng: -12.656121191677354
+        })
+      } else if (y < 1350) {
+        console.log(y,'< 0')
+        this.$store.commit('xupdateOverlayC1',{
+          lat: -19.31114335506464,
+          lng: 139.21819983498187
+        })
+        this.$store.commit('xupdateOverlayC2',{
+          lat: 67.33986082559097,
+          lng: -33.75550165018157
+        })
+      } else {
+        console.log(y)
+        this.$store.commit('xupdateOverlayC1',{
+          lat: -63.074865690586634,
+          lng: 182.8204861160042
+        })
+        this.$store.commit('xupdateOverlayC2',{
+          lat: 73.62778879339942,
+          lng: -138.88644434423574
+        })
+      }
+
+    },
+    cities(c) {
+      if (c) {
+        citiesLayer.addTo(map)
+      } else {
+        citiesLayer.removeFrom(map)
       }
     },
-    '$store.state.cities': {
-      deep: true,
-      handler: function() {
-
-        // const store = this.$store
-
-        // for (const name of Object.keys(data)) {
-
-          // const city = data[name]
-          // console.log(city)
-          // for (const year of Object.keys(region)) {
-
-          //   const key = `${name}-${year}`
-          //   if (!regionLayers[key]) {
-          //     const layer = L.geoJSON(region[year].geojson)
-          //     layer._region = region[year]
-          //     layer.on('click',function() {
-          //       store.commit('setRegion',region[year].geojson)
-          //     });
-          //     regionLayers[key] = layer
-          //   }
-          // }
-        // }
-
-        this.updateVisibility()
+    rivers(r) {
+      if (r) {
+        map.addLayer(riversLayer)
+      } else {
+        map.removeLayer(riversLayer)
       }
     },
-    '$store.state.rivers': {
-      deep: true,
-      handler: function() {
-        console.log(this.$store.state.rivers)
-        // const store = this.$store
-        // for (const name of Object.keys(data)) {
-        //   const region = data[name]
-        //   for (const year of Object.keys(region)) {
-
-        //     const key = `${name}-${year}`
-        //     if (!regionLayers[key]) {
-        //       const layer = L.geoJSON(region[year].geojson)
-        //       layer._region = region[year]
-        //       layer.on('click',function() {
-        //         store.commit('setRegion',region[year].geojson)
-        //       });
-        //       regionLayers[key] = layer
-        //     }
-        //   }
-        // }
-
-        // this.updateVisibility()
+    continents(c) {
+      if (c) {
+        map.addLayer(continentsLayer)
+      } else {
+        map.removeLayer(continentsLayer)
       }
-    },
-    year() {
-      this.updateVisibility()
-    },
-    cities() {
-      console.log('cities')
-      this.updateVisibility()
-    },
-    rivers() {
-      console.log('rivers')
-      this.updateVisibility()
-    },
-    continents() {
-      console.log('continents')
-      this.updateVisibility()
     },
     name () {
       modifyRegionLabel(this.$store)
@@ -713,6 +1222,12 @@ console.log('regions updated')
     }
   },
   methods: {
+    // back10() {
+
+    // },
+    // forward10() {
+
+    // }
     // fetchRegions() {
     //   fetch('http://localhost:3000/regions')
     //     .then((response) => response.json())
@@ -752,38 +1267,21 @@ console.log('regions updated')
     // },
     updateVisibility() {
 
-      const regionKey = `${this.$store.getters.region.properties.name}-${this.$store.getters.region.properties.year.from}`
-      const showContinents = this.continents
-
       regionsLayer.eachLayer((layer) => {
-
-          const name = layer._name
-          if (!showContinents && name.startsWith('continent - ')) {
-            regionsLayer.removeLayer(layer)
-          }
-          const from = layer._from
-          const to = layer._to
-          const key = `${name}-${from}`
-
-          if (key == regionKey || this.year < from || this.year > to) {
+          if (this.year < layer._from || this.year > layer._to) {
             regionsLayer.removeLayer(layer)
           }
       })
 
-      for ( const k in regionLayers) {
-        const layer = regionLayers[k]
-        const name = layer._name
-        if (!showContinents && name.startsWith('continent - ')) continue
-        const from = layer._from
-        const to = layer._to
-        const key = `${name}-${from}`
-
-        if (key != regionKey && this.year >= from && this.year <= to) {
-          regionsLayer.addLayer(layer)
-
+      for ( const name in regionLayers) {
+        for (const year in regionLayers[name]) {
+          const layer = regionLayers[name][year]
+          if (this.year >= layer._from && this.year <= layer._to) {
+            regionsLayer.addLayer(layer)
+          }          
         }
-
       }
+
       // const rs = this.$store.state.regions
       // for (const name of Object.keys(rs)) {
       //   const region = rs[name]

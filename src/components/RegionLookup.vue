@@ -56,7 +56,9 @@ export default {
         if (this.regionLookupName=="") return []
         const region = this.$store.state.regions[this.regionLookupName]
         if (!region) return []
-        return Object.keys(region)
+        return Object.keys(region).sort((a,b) => {
+          return Number.parseInt(a) < Number.parseInt(b)
+        })
       }
     },
     nameExists: {
@@ -72,7 +74,9 @@ export default {
     prevYearExists: {
       get() {
         if (!this.nameExists || !this.yearExists) return false
-        const years = Object.keys(this.$store.state.regions[this.regionLookupName.toLowerCase()])
+        const years = Object.keys(this.$store.state.regions[this.regionLookupName.toLowerCase()]).sort((a,b) => {
+          return Number.parseInt(a) < Number.parseInt(b)
+        })
         const curr = years.indexOf(this.regionLookupYear.toLowerCase())
         return (curr + 1 < years.length)
       }
@@ -80,7 +84,9 @@ export default {
     nextYearExists: {
       get() {
         if (!this.nameExists || !this.yearExists) return false
-        const years = Object.keys(this.$store.state.regions[this.regionLookupName.toLowerCase()])
+        const years = Object.keys(this.$store.state.regions[this.regionLookupName.toLowerCase()]).sort((a,b) => {
+          return Number.parseInt(a) < Number.parseInt(b)
+        })
         const curr = years.indexOf(this.regionLookupYear.toLowerCase())
         return (curr > 0)
       }
@@ -88,7 +94,9 @@ export default {
   },
   methods: {
     prev() {
-      const years = Object.keys(this.$store.state.regions[this.regionLookupName.toLowerCase()])
+      const years = Object.keys(this.$store.state.regions[this.regionLookupName.toLowerCase()]).sort((a,b) => {
+        return Number.parseInt(a) < Number.parseInt(b)
+      })
       const curr = years.indexOf(this.regionLookupYear.toLowerCase())
 
       this.regionLookupYear = years[curr+1]
@@ -98,7 +106,9 @@ export default {
       this.$store.commit('setRegion',{name:this.regionLookupName.toLowerCase(),year:this.regionLookupYear})
     },
     next() {
-      const years = Object.keys(this.$store.state.regions[this.regionLookupName.toLowerCase()])
+      const years = Object.keys(this.$store.state.regions[this.regionLookupName.toLowerCase()]).sort((a,b) => {
+        return Number.parseInt(a) < Number.parseInt(b)
+      })
       const curr = years.indexOf(this.regionLookupYear.toLowerCase())
 
       this.regionLookupYear = years[curr-1]
