@@ -114,7 +114,9 @@ const colors = {
   'kingdom of kush': C_EGYPT,
   lycia: C_SYRO_HITTITE,
   'lower egypt': C_EGYPT,
+  macedon: C_GREEK,
   magan: C_GULF,
+  medes: '#2c7332', // dark green
   minoan: '#804200',
   mycenae: C_GREEK,
   mitanni: '#ffa200', // bright orange

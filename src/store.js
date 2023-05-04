@@ -26,7 +26,7 @@ export const store = createStore({
         //   lng: -12.656121191677354
         // }
       },
-      displayYear: -800,
+      displayYear: -700,
       loading: true,
       region: {
         type: 'Feature',
@@ -172,7 +172,7 @@ export const store = createStore({
         if (!response.ok) {
           throw new Error(response.statusText);
         }
-        delete store.state.regions[region.properties.name][`${region.properties.year}`]
+        delete store.state.regions[region.properties.name.toLowerCase()][`${region.properties.year}`]
         store.commit('resetRegion')
         this.dispatch('regionDeleted',region)
       })
@@ -203,6 +203,9 @@ export const store = createStore({
           throw new Error(response.statusText);
         }
         console.log(`region updated ${region.properties.name} @ ${region.properties.year}`)
+        if (!store.state.regions[region.properties.name.toLowerCase()]) {
+          store.state.regions[region.properties.name.toLowerCase()] = {}
+        }
         store.state.regions[region.properties.name.toLowerCase()][`${region.properties.year}`] = region
         store.state.regionEdited = false
         this.dispatch('regionUpdated',region)
