@@ -97,6 +97,7 @@ const C_ARABIA= '#f5e97d' // sandy
 
 const colors = {
   aramea: C_GULF,
+  achaemenid: '#2c7332', // dark green
   arzawa: C_SYRO_HITTITE,
   assyria: '#031194', // blue
   ba: C_CHINA,
