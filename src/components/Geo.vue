@@ -99,8 +99,10 @@ const colors = {
   aramea: C_GULF,
   arzawa: C_SYRO_HITTITE,
   assyria: '#031194', // blue
+  ba: C_CHINA,
   babylonia: '#a61d1b', // red
   canaan: '#9c4c27',
+  'china states': C_CHINA,
   colchis: C_SYRO_HITTITE,
   dilmun: C_GULF,
   egypt: C_EGYPT,
@@ -112,7 +114,7 @@ const colors = {
   hittites: '#ab6605', // orange brown
   hyksos: C_EGYPT,
   'kingdom of kush': C_EGYPT,
-  lycia: C_SYRO_HITTITE,
+  lydia: C_SYRO_HITTITE,
   'lower egypt': C_EGYPT,
   macedon: C_GREEK,
   magan: C_GULF,
@@ -126,6 +128,7 @@ const colors = {
   punt: C_EGYPT, // gold
   saba: C_ARABIA,
   shang: C_CHINA,
+  shu: C_CHINA,
   syria: C_SYRO_HITTITE,
   tabal: '#14ff20', // fluro green
   ugarit: C_SYRO_HITTITE,
