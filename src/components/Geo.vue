@@ -102,9 +102,12 @@ const colors = {
   assyria: '#031194', // blue
   ba: C_CHINA,
   babylonia: '#a61d1b', // red
+  'bosporan kingdom': '#5c3610',
   canaan: '#9c4c27',
   'china states': C_CHINA,
+  chu: C_CHINA,
   colchis: C_SYRO_HITTITE,
+  'delian league': C_GREEK,
   dilmun: C_GULF,
   egypt: C_EGYPT,
   elam: '#2c7332', // dark green
@@ -112,12 +115,15 @@ const colors = {
   'greek-state': C_GREEK,
   'greek-state-a': C_GREEK,
   'greek-state-gg': C_GREEK,
+  'greek egypt': C_GREEK,
   hittites: '#ab6605', // orange brown
   hyksos: C_EGYPT,
+  jin: C_CHINA,
   'kingdom of kush': C_EGYPT,
   lydia: C_SYRO_HITTITE,
   'lower egypt': C_EGYPT,
   macedon: C_GREEK,
+  macedonia: C_GREEK,
   magan: C_GULF,
   medes: '#2c7332', // dark green
   minoan: '#804200',
@@ -127,16 +133,20 @@ const colors = {
   phoenicia: '#6e4229', // brown
   phrygia: C_SYRO_HITTITE,
   punt: C_EGYPT, // gold
+  qin: C_CHINA,
+  qi: C_CHINA,
   saba: C_ARABIA,
   shang: C_CHINA,
   shu: C_CHINA,
   syria: C_SYRO_HITTITE,
   tabal: '#14ff20', // fluro green
+  thrace: C_GREEK,
   ugarit: C_SYRO_HITTITE,
   'upper egypt': C_EGYPT,
   uratu: '#ff9500', // bright orange
   xia: C_CHINA,
   xios: C_EGYPT,
+  yan: C_CHINA,
   zhou: C_CHINA
 }
 
