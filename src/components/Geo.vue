@@ -113,14 +113,18 @@ const colors = {
   egypt: C_EGYPT,
   elam: '#2c7332', // dark green
   epirus: C_GREEK,
+  gojoseon: C_CHINA,
   'greek-state': C_GREEK,
   'greek-state-a': C_GREEK,
   'greek-state-gg': C_GREEK,
   'greek egypt': C_GREEK,
+  'greco-bactria': C_GREEK,
+  hadra: C_ARABIA,
   hittites: '#ab6605', // orange brown
   hyksos: C_EGYPT,
   jin: C_CHINA,
   'kingdom of kush': C_EGYPT,
+  meroe: C_EGYPT,
   lydia: C_SYRO_HITTITE,
   'lower egypt': C_EGYPT,
   macedon: C_GREEK,
@@ -128,6 +132,7 @@ const colors = {
   magan: C_GULF,
   medes: '#2c7332', // dark green
   minoan: '#804200',
+  minaea: C_ARABIA,
   minyue: C_CHINA,
   mycenae: C_GREEK,
   mitanni: '#ffa200', // bright orange
@@ -148,10 +153,12 @@ const colors = {
   ugarit: C_SYRO_HITTITE,
   'upper egypt': C_EGYPT,
   uratu: '#ff9500', // bright orange
+  wei: C_CHINA,
   xia: C_CHINA,
   xios: C_EGYPT,
   yan: C_CHINA,
-  zhou: C_CHINA
+  zhou: C_CHINA,
+  zhao: C_CHINA
 }
 
 var cityIcon = L.icon({
