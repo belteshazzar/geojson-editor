@@ -98,6 +98,7 @@ const C_ARABIA= '#f5e97d' // sandy
 const colors = {
   aramea: C_GULF,
   achaemenid: '#2c7332', // dark green
+  armenia: '#f0940a',
   arzawa: C_SYRO_HITTITE,
   assyria: '#031194', // blue
   ba: C_CHINA,
@@ -127,14 +128,17 @@ const colors = {
   magan: C_GULF,
   medes: '#2c7332', // dark green
   minoan: '#804200',
+  minyue: C_CHINA,
   mycenae: C_GREEK,
   mitanni: '#ffa200', // bright orange
   nubia: C_EGYPT,
   phoenicia: '#6e4229', // brown
   phrygia: C_SYRO_HITTITE,
   punt: C_EGYPT, // gold
+  qataban: C_ARABIA,
   qin: C_CHINA,
   qi: C_CHINA,
+  'roman empire': '#5406ba',
   saba: C_ARABIA,
   shang: C_CHINA,
   shu: C_CHINA,
