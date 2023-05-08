@@ -97,6 +97,7 @@ const C_ARABIA= '#f5e97d' // sandy
 
 const colors = {
   aramea: C_GULF,
+  aksum: C_GULF,
   arkesilas: C_GREEK,
   asla: C_GREEK,
   antigonos: C_GREEK,
@@ -128,6 +129,8 @@ const colors = {
   'greek-state-gg': C_GREEK,
   'greek egypt': C_GREEK,
   'greco-bactria': C_GREEK,
+  han: C_CHINA,
+  himyar: C_ARABIA,
   hadra: C_ARABIA,
   hittites: '#ab6605', // orange brown
   hyksos: C_EGYPT,
@@ -142,6 +145,7 @@ const colors = {
   lydia: C_SYRO_HITTITE,
   lysimachos: C_GREEK,
   'lower egypt': C_EGYPT,
+  maan: C_ARABIA,
   macedon: C_GREEK,
   macedonia: C_GREEK,
   magan: C_GULF,
@@ -167,6 +171,7 @@ const colors = {
   phrygia: C_SYRO_HITTITE,
   peuketas: C_GREEK,
   punt: C_EGYPT, // gold
+  qalban: C_ARABIA,
   qataban: C_ARABIA,
   qin: C_CHINA,
   qi: C_CHINA,
@@ -177,7 +182,7 @@ const colors = {
   shang: C_CHINA,
   shu: C_CHINA,
   stasanor: C_GREEK,
-  syria: C_SYRO_HITTITE,
+  syria: C_GREEK,
   tabal: '#14ff20', // fluro green
   taxiles: C_GREEK,
   tlepolemos: C_GREEK,
