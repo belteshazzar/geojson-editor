@@ -136,10 +136,13 @@ const colors = {
   hittites: '#ab6605', // orange brown
   hyksos: C_EGYPT,
   'indo-greek kingdom': C_GREEK,
+  'indo-parthia': '#00FF00',
+  'indo-scythia': '#00ff00',
   jin: C_CHINA,
   'kingdom of kush': C_EGYPT,
   koinos: C_GREEK,
   krateros: C_GREEK,
+  kushan: '#00ff00',
   meroe: C_EGYPT,
   laomedon: C_GREEK,
   lennatros: C_GREEK,
@@ -196,6 +199,7 @@ const colors = {
   'upper egypt': C_EGYPT,
   uratu: '#ff9500', // bright orange
   wei: C_CHINA,
+  'western satraps': '#00ff00',
   xia: C_CHINA,
   xin: C_CHINA,
   xios: C_EGYPT,

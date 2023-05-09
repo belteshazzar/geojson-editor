@@ -26,13 +26,13 @@ export const store = createStore({
         //   lng: -12.656121191677354
         // }
       },
-      displayYear: 1,
+      displayYear: 200,
       loading: true,
       region: {
         type: 'Feature',
         properties: {
           name: '',
-          year: 100,
+          year: 0,
           known_as: '',
           source: '',
           overlay: { url: '', c1: { lat: 0.0, lng: 0.0 }, c2: { lat: 0.0, lng: 0.0 }},
