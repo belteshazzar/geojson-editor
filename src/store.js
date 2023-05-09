@@ -32,7 +32,7 @@ export const store = createStore({
         type: 'Feature',
         properties: {
           name: '',
-          year: 0,
+          year: 100,
           known_as: '',
           source: '',
           overlay: { url: '', c1: { lat: 0.0, lng: 0.0 }, c2: { lat: 0.0, lng: 0.0 }},
@@ -151,8 +151,13 @@ export const store = createStore({
       state.regionEdited = true
     },
     updateGeometry(state,_geometry) {
+      console.log(JSON.stringify(_geometry))
+      try {
       state.region.geometry = _geometry
       state.regionEdited = true
+      } catch (e) {
+        console.log(e)
+      }
     },
   },
   actions: {

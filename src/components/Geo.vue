@@ -94,6 +94,7 @@ const C_GULF = '#fbff00' // bright yellow
 const C_EGYPT = '#d9bf30' // gold
 const C_CHINA = '#a80c0c' // dark red
 const C_ARABIA= '#f5e97d' // sandy
+const C_MONGOL = '#32a895' // aqua
 
 const colors = {
   aramea: C_GULF,
@@ -184,6 +185,9 @@ const colors = {
   stasanor: C_GREEK,
   syria: C_GREEK,
   tabal: '#14ff20', // fluro green
+  'tarim (xiongnu)': C_MONGOL,
+  'tarim (han)': C_CHINA,
+  'tarim (xin)': C_CHINA,
   taxiles: C_GREEK,
   tlepolemos: C_GREEK,
   tocharia: 'yellow',
@@ -193,7 +197,9 @@ const colors = {
   uratu: '#ff9500', // bright orange
   wei: C_CHINA,
   xia: C_CHINA,
+  xin: C_CHINA,
   xios: C_EGYPT,
+  'xiongnu khanate': C_MONGOL,
   yan: C_CHINA,
   zhou: C_CHINA,
   zhao: C_CHINA
@@ -773,7 +779,7 @@ function createMap (component) {
     drawText: false,
     drawCircle: false,
     dragMode: false,
-    cutPolygon: false,
+    cutPolygon: true,
     rotateMode: false,  
     // removalMode: false,
   });
