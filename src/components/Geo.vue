@@ -162,6 +162,7 @@ const colors = {
   nabataea: C_ARABIA,
   nubia: C_EGYPT,
   oxyartes: C_GREEK,
+  'palmyrene empire': C_GREEK,
   parthia: '#00ff00',
   peithan: C_GREEK,
   perdikkas: C_GREEK,
