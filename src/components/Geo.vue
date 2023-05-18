@@ -95,6 +95,7 @@ const C_EGYPT = '#d9bf30' // gold
 const C_CHINA = '#a80c0c' // dark red
 const C_ARABIA= '#f5e97d' // sandy
 const C_MONGOL = '#32a895' // aqua
+const C_SASS= '#2c7332' // dark green
 
 const colors = {
   aramea: C_GULF,
@@ -106,7 +107,7 @@ const colors = {
   atropates: C_GREEK,
   atropatene: C_GREEK,
   amphimachus: C_GREEK,
-  achaemenid: '#2c7332', // dark green
+  achaemenid: C_SASS,
   armenia: '#f0940a',
   arzawa: C_SYRO_HITTITE,
   assyria: '#031194', // blue
@@ -114,6 +115,7 @@ const colors = {
   babylonia: '#a61d1b', // red
   'bosporan kingdom': '#5c3610',
   bithynia: C_GREEK,
+  'byzantine empire': C_GREEK,
   canaan: '#9c4c27',
   cappadocia: C_GREEK,
   'china states': C_CHINA,
@@ -122,7 +124,7 @@ const colors = {
   'delian league': C_GREEK,
   dilmun: C_GULF,
   egypt: C_EGYPT,
-  elam: '#2c7332', // dark green
+  elam: C_SASS,
   epirus: C_GREEK,
   gojoseon: C_CHINA,
   'greek-state': C_GREEK,
@@ -130,6 +132,7 @@ const colors = {
   'greek-state-gg': C_GREEK,
   'greek egypt': C_GREEK,
   'greco-bactria': C_GREEK,
+  ghassanids: C_GREEK,
   han: C_CHINA,
   himyar: C_ARABIA,
   hadra: C_ARABIA,
@@ -148,12 +151,17 @@ const colors = {
   lennatros: C_GREEK,
   lydia: C_SYRO_HITTITE,
   lysimachos: C_GREEK,
+  lakhmids: C_SASS,
+  hephthalites: C_SASS,
+  taak: C_SASS,
+  'himyar - sasanian': C_SASS,
   'lower egypt': C_EGYPT,
   maan: C_ARABIA,
   macedon: C_GREEK,
   macedonia: C_GREEK,
   magan: C_GULF,
-  medes: '#2c7332', // dark green
+  medes: C_SASS,
+  mecca: C_GULF,
   minoan: '#804200',
   minaea: C_ARABIA,
   minyue: C_CHINA,
@@ -182,10 +190,12 @@ const colors = {
   qi: C_CHINA,
   'roman empire': '#5406ba',
   saba: C_ARABIA,
+  'sassanid empire': C_SASS,
   selucus: C_GREEK,
   sibyitos: C_GREEK,
   shang: C_CHINA,
   shu: C_CHINA,
+  sui: C_CHINA,
   stasanor: C_GREEK,
   syria: C_GREEK,
   tabal: '#14ff20', // fluro green
