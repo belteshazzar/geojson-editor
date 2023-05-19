@@ -184,6 +184,7 @@ const colors = {
   phrygia: C_SYRO_HITTITE,
   peuketas: C_GREEK,
   punt: C_EGYPT, // gold
+  'rashidun caliphate': C_SASS,
   qalban: C_ARABIA,
   qataban: C_ARABIA,
   qin: C_CHINA,
