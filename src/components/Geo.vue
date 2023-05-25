@@ -98,6 +98,14 @@ const C_MONGOL = '#32a895' // aqua
 const C_SASS= '#2c7332' // dark green
 
 const colors = {
+  'fatimid caliphate': C_SASS,
+  'abbasid caliphate': C_SASS,
+  'qarmathian republic': C_SASS,
+  'seljuqs': 'orange',
+  azerbaijan: C_SASS,
+  aleppo: C_SASS,
+  oman: C_SASS,
+  yemen: C_SASS,
   aramea: C_GULF,
   aksum: C_GULF,
   arkesilas: C_GREEK,
@@ -147,6 +155,12 @@ const colors = {
   krateros: C_GREEK,
   kushan: '#00ff00',
   meroe: C_EGYPT,
+  liao: C_CHINA,
+  xixia: C_CHINA,
+  'tibetan kingdoms': C_CHINA,
+  'northern song': C_CHINA,
+  'southern song': C_CHINA,
+  'tang': C_CHINA,
   laomedon: C_GREEK,
   lennatros: C_GREEK,
   lydia: C_SYRO_HITTITE,
