@@ -3,10 +3,12 @@ const util = require('util')
 const colors = require('./colors.js').colors
 
 const express = require('express')
-const app = express()
-app.use(express.json())
 const cors = require('cors');
+
+const app = express()
+app.use(express.json({limit: '50mb'}));
 app.use(cors())
+
 const port = 3000
 
 const fs = require('fs');
