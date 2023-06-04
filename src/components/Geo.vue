@@ -246,6 +246,7 @@ var cityIcon = L.icon({
     popupAnchor:  [0, 0] // point from which the popup should open relative to the iconAnchor
 });
 
+const EDIT_CONTINENTS = false
 let map = null
 let continentsLayer = null
 let continentLayers = {}
@@ -450,19 +451,21 @@ const regionsUpdated = debounce((component) => {
 
   for (const name of Object.keys(store.state.regions)) {
 
-    if (name.startsWith('continent - ')) {
-      let layer = continentLayers[name]
-      if (!layer) {
-        const geojson = store.state.regions[name][Object.keys(store.state.regions[name])[0]]
-        layer = L.geoJSON(geojson)
-        layer.pm.setOptions({ allowEditing: false })
-        layer._name = name
-        layer._geojson = geojson
-        layer.setStyle({fillColor: '#104f05', color: '#104f05'});
-        continentLayers[name] = layer
-        continentsLayer.addLayer(layer)
+    if (!EDIT_CONTINENTS) {
+      if (name.startsWith('continent - ')) {
+        let layer = continentLayers[name]
+        if (!layer) {
+          const geojson = store.state.regions[name][Object.keys(store.state.regions[name])[0]]
+          layer = L.geoJSON(geojson)
+          layer.pm.setOptions({ allowEditing: false })
+          layer._name = name
+          layer._geojson = geojson
+          layer.setStyle({fillColor: '#104f05', color: '#104f05'});
+          continentLayers[name] = layer
+          continentsLayer.addLayer(layer)
+        }
+        continue
       }
-      continue
     }
 
     if (!regionLayers[name]) {
