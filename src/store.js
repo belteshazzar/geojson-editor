@@ -26,7 +26,7 @@ export const store = createStore({
         //   lng: -12.656121191677354
         // }
       },
-      displayYear: 1755,
+      displayYear: 1799,
       loading: true,
       region: {
         type: 'Feature',

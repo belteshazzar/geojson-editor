@@ -9,7 +9,7 @@ json.features.forEach(feature => {
     const geojson = { 
         type: 'Feature',
         properties: {
-            name: p.NAME,
+            name: '_'+p.NAME,
             year: year,
             known_as: '',
             source: '',
@@ -26,7 +26,7 @@ json.features.forEach(feature => {
         body: JSON.stringify(geojson)
     };
 
-    fetch(`http://localhost:3000/regions/${p.NAME}/${year}`, requestOptions)
+    fetch(`http://localhost:3000/regions/_${p.NAME}/${year}`, requestOptions)
         .then(r => console.log(`${p.NAME}/${year} = ${r.statusText}`))
         .catch(err => {
             console.log(err)
