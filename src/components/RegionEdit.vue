@@ -71,8 +71,12 @@
     </div>
 
     <div class="sidebar-full">
+      <label for="geometry">Null: </label>
+      <input type="checkbox" id="isNull" name="isNull" v-model="isNull" />
+    </div>
+    <div class="sidebar-full">
       <label for="geometry">Geometry: </label>
-      <textarea id="geometry" name="geometry" rows="5" v-model="geometry"></textarea>
+      <textarea id="geometry" name="geometry" :disabled="isNull" rows="5" v-model="geometry"></textarea>
     </div>
 
 
@@ -81,6 +85,11 @@
     </div>
     <div class="sidebar-half">
       <button id="reset" name="reset" @click="reset">clear selection</button>
+    </div>
+
+    <div style="height: 100px;"></div>
+
+    <div class="sidebar-half">
       <button id="remove" name="remove" @click="remove">delete</button>
     </div>
   </div>
@@ -208,6 +217,16 @@ export default {
       },
       set (value) {
         this.$store.commit('updateLabel', {lat: this.$store.state.region.properties.label.lat, lng: Number.parseFloat(value)})
+      }
+    },
+    isNull: {
+      get () {
+        return JSON.stringify(this.$store.state.region.geometry) == 'null'
+      },
+      set (value) {
+        if (value) {
+          this.$store.commit('updateGeometry', null)
+        }
       }
     },
     geometry: {

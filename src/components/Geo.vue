@@ -294,7 +294,14 @@ function debounce(cb, delay = 250) {
 
 function createLayer(store, geojson) {
 
-  let layer = L.geoJSON(geojson)
+  let layer
+  try {
+    layer = L.geoJSON(geojson)
+  } catch (e) {
+    console.log(geojson)
+    geojson.geometry = null
+    layer = L.geoJSON(geojson)
+  }
   layer.pm.setOptions({ allowEditing: false })
   layer._name = geojson.properties.name.toLowerCase()
   layer._geojson = geojson
@@ -444,12 +451,11 @@ const regionsUpdated = debounce((component) => {
   // TODO: only adds, should also remove
   
   const store = component.$store
-  console.log(component)
 
   for (const name of Object.keys(store.state.regions)) {
 
     if (!name.startsWith('_')) continue
-    
+
     if (!EDIT_CONTINENTS) {
       if (name.startsWith('continent - ')) {
         let layer = continentLayers[name]
