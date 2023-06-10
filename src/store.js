@@ -34,6 +34,7 @@ export const store = createStore({
           name: '',
           year: 0,
           known_as: '',
+          part_of: '',
           source: '',
           overlay: { url: '', c1: { lat: 0.0, lng: 0.0 }, c2: { lat: 0.0, lng: 0.0 }},
           note: '',
@@ -84,6 +85,7 @@ export const store = createStore({
           name: '',
           year: 0,
           known_as: '',
+          part_of: '',
           source: '',
           overlay: { url: '', c1: { lat: 0.0, lng: 0.0 }, c2: { lat: 0.0, lng: 0.0 }},
           note: '',
@@ -115,6 +117,10 @@ export const store = createStore({
     },
     updateKnownAs(state,_known_as) {
       state.region.properties.known_as = _known_as
+      state.regionEdited = true
+    },
+    updatePartOf(state,_part_of) {
+      state.region.properties.part_of = _part_of
       state.regionEdited = true
     },
     updateSource(state,_source) {

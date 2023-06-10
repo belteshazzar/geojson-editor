@@ -3,28 +3,30 @@
     <div class="sidebar-padding">
 
 
-    <div class="sidebar-half">
+    <div class="sidebar-third">
       <label for="name">Name: </label>
       <input type="text" id="name" name="name" v-model="name"/>
     </div>
-    <div class="sidebar-half">
+    <div class="sidebar-third">
       <label for="known-as">Known As: </label>
       <input type="text" id="known-as" name="known-as" v-model="knownAs"/>
     </div>
+    <div class="sidebar-third">
+      <label for="part-of">Part Of: </label>
+      <input type="text" id="part-of" name="part-of" v-model="partOf"/>
+    </div>
 
-    <div class="sidebar-25">
+    <div class="sidebar-third">
       <label for="prevYear">Previous Year: </label>
       <button id="prevYear" name="prevYear" @click="loadPrevious">{{ yearPrevious }}</button>
     </div>
-    <div class="sidebar-25">
+    <div class="sidebar-third">
       <label for="year">Year: </label>
       <input type="text" id="year" name="year" v-model="year"/>
     </div>
-    <div class="sidebar-25">
+    <div class="sidebar-third">
       <label for="nextYear">Next Year: </label>
       <button id="nextYear" name="nextYear" @click="loadNext">{{ yearNext }}</button>
-    </div>
-    <div class="sidebar-25">
     </div>
 
     <div class="sidebar-half">
@@ -68,8 +70,10 @@
       <textarea id="note" name="note" rows="5" v-model="note"></textarea>
     </div>
 
-    <label for="geometry">Geometry: </label>
-    <textarea id="geometry" name="geometry" rows="5" v-model="geometry"></textarea>
+    <div class="sidebar-full">
+      <label for="geometry">Geometry: </label>
+      <textarea id="geometry" name="geometry" rows="5" v-model="geometry"></textarea>
+    </div>
 
 
     <div class="sidebar-half">
@@ -124,6 +128,14 @@ export default {
       },
       set (value) {
         this.$store.commit('updateKnownAs', value)
+      }
+    },
+    partOf: {
+      get () {
+        return this.$store.state.region.properties.part_of
+      },
+      set (value) {
+        this.$store.commit('updatePartOf', value)
       }
     },
     source: {
@@ -287,7 +299,12 @@ button {
   float: left;
 }
 
-.sidebar-25 {
+.sidebar-third {
+  width: 33%;
+  float: left;
+}
+
+.sidebar-qaurter {
   width: 25%;
   float: left;
 }

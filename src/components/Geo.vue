@@ -412,9 +412,6 @@ const citiesUpdated = debounce((component) => {
 
 function calculateFromToRegion(region) {
 
-console.log('calculateFromToRegion')
-console.log(region)
-
   const years = Object.keys(region).map(v => Number.parseInt(v)).sort((a,b) => a - b)
 
   for (let i=0 ; i<years.length ; i++) {
@@ -451,6 +448,8 @@ const regionsUpdated = debounce((component) => {
 
   for (const name of Object.keys(store.state.regions)) {
 
+    if (!name.startsWith('_')) continue
+    
     if (!EDIT_CONTINENTS) {
       if (name.startsWith('continent - ')) {
         let layer = continentLayers[name]
