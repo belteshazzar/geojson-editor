@@ -42,7 +42,11 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 import '@geoman-io/leaflet-geoman-free';  
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
 import union from '@turf/union'
+//import slice from '@turf/polygon-slice'
 import inside from '@turf/boolean-point-in-polygon'
+//import turf from '@turf/turf'
+
+import * as turf from '@turf/turf'
 
 //import 'leaflet-distortableimage'
 
@@ -53,6 +57,54 @@ L.Icon.Default.mergeOptions({
   iconUrl: markerIcon,
   shadowUrl: markerShadow
 })
+
+
+
+
+
+/**
+*	Function that cuts a {@link Polygon} with a {@link Linestring}
+* @param {Feature<(Polygon)>} poly - single Polygon Feature
+* @param {Feature<(Polyline)>} line - single Polyline Feature
+* @return {FeatureCollection<(Polygon)>}
+* @author	Abel Vázquez
+* @version 1.0.0
+*
+* edited into plug and play function for inventorymanager 8/22 JM
+*/
+function turfCut(poly, line){
+  // validation
+	if (poly.geometry === void 0 || poly.geometry.type !== 'Polygon' ){
+    throw('"turf-cut" only accepts Polygon type as victim input');
+  }
+	if (line.geometry === void 0 || line.geometry.type !== 'LineString' ){
+    throw('"turf-cut" only accepts LineString type as axe input');
+  }
+  // updated from inside to booleanPointInPolygon 8/22 JM
+	if(turf.booleanPointInPolygon(turf.point(line.geometry.coordinates[0]), poly)
+      || turf.booleanPointInPolygon(turf.point(line.geometry.coordinates[line.geometry.coordinates.length-1]), poly)){
+    throw('Both first and last points of the polyline must be outside of the polygon');
+  }
+
+  // erase replaced by difference and buffer function changed significantly
+	var _axe = turf.buffer(line, 0.001, {units: 'meters'}),
+      _body = turf.difference(poly, _axe),
+      pieces = [];
+
+	if (_body.geometry.type == 'Polygon' ){
+		pieces.push(turf.polygon(_body.geometry.coordinates));
+	}else{
+		_body.geometry.coordinates.forEach(a => pieces.push(turf.polygon(a)));
+	}
+
+	pieces.forEach(a => a.properties = poly.properties);
+
+	return turf.featureCollection(pieces);
+}
+
+
+
+
 
 var createPixelGIF = (function() {
 
@@ -454,7 +506,7 @@ const regionsUpdated = debounce((component) => {
 
   for (const name of Object.keys(store.state.regions)) {
 
-    if (!name.startsWith('_')) continue
+    // if (!name.startsWith('_')) continue
 
     if (!EDIT_CONTINENTS) {
       if (name.startsWith('continent - ')) {
@@ -811,7 +863,7 @@ function createMap (component) {
   map.pm.addControls({  
     position: 'topright',
     drawMarker: false,
-    drawPolyline: false,
+    drawPolyline: true,
     drawRectangle: false,
     drawCircleMarker: false,
     drawText: false,
@@ -850,10 +902,86 @@ function createMap (component) {
 
   map.on('pm:remove', convertToMultiPolygons)
 
+  // function cutDrawnItemsWith(line) {
+  //   drawnItems.getLayers().forEach((layer) => {
+  //       const geojson = layer.toGeoJSON()
+  //       console.log(line,geojson)
+  //   })
+    // drawnItems.forEach(function (polygon) {
+    //     var layer;
+    //     var upperCut = cutPolygon(polygon, line, 1, 'upper');
+    //     if (upperCut != null) {
+    //       layer = L.geoJSON(upperCut, {
+    //         style: function(feature) {
+    //           return {color: 'green' };
+    //         }
+    //       }).addTo(map);   
+    //       drawnItems.push(layer);
+    //     };
+    //     var lowerCut = cutPolygon(polygon, line, -1, 'lower');
+    //     if (lowerCut != null) {
+    //       layer = L.geoJSON(lowerCut, {
+    //         style: function(feature) {
+    //           return {color: 'yellow' };
+    //         }
+    //       }).addTo(map);
+    //       drawnItems.push(layer);
+    //     };
+    //   });
+
+  // }
+
+  function cutDrawnItemsWith(newLayer) {
+
+    const lineGeoJson = newLayer.toGeoJSON()
+
+    const geom = {
+      type: 'MultiPolygon',
+      coordinates: []
+    }
+
+    // https://jsfiddle.net/TomazicM/2rdbcmL0/
+    function cut(geojson) {
+      const featureCollection = turfCut(geojson,lineGeoJson)
+      featureCollection.features.forEach(f => {
+        console.log(f)
+        geom.coordinates.push(f.geometry.coordinates)
+
+      })
+    }
+
+      drawnItems.getLayers().forEach((layer) => {
+        if (layer == newLayer) return
+
+        const geojson = layer.toGeoJSON()
+
+        if (geojson.geometry.type == 'Polygon') {
+          cut(geojson)
+        } else if (geojson.geometry.type == 'MultiPolygon') {
+          geojson.geometry.coordinates.forEach((coords) => {
+            cut({type: 'Feature', geometry: { type: 'Polygon',coordinates: coords}})
+          })
+        } else {
+          console.error('expected layer to be Polygon or MultiPolygon but was: ' + geojson.geometry.type)
+        }
+      })
+
+      console.log('cut into: -----',geom)
+      store.commit('updateGeometry', geom)
+
+
+  }
+
   map.on('pm:create', function (e) {
     console.log('pm:create')
 
     console.log(e)
+
+    if (e.shape == 'Line') {
+      drawnItems.removeLayer(e.layer)
+      cutDrawnItemsWith(e.layer)
+      return
+    }
 
     const newLayer = e.layer;
     const newGeoJSON = newLayer.toGeoJSON()
@@ -891,6 +1019,7 @@ function createMap (component) {
 
       geom.coordinates.push(newGeoJSON.geometry.coordinates)
 
+      console.log('update geometry',geom)
       store.commit('updateGeometry', geom)
 
     }
@@ -930,6 +1059,7 @@ function createMap (component) {
   }
 
   function convertToMultiPolygons() {
+console.log('convert to multi polygons')
 
     if (drawnItems.getLayers().length == 0) {
 
@@ -955,7 +1085,7 @@ function createMap (component) {
     }
 
   }
-
+    
   // MultiPolygon editing doesn't work
   // so convert to polygons
 
@@ -1027,10 +1157,9 @@ function modifyRegionGeometry (store) {
     return
   }
 
-  console.log('modify region geometry')
 
   function convertToPolygons() {
-    console.log('convert to polygons')
+console.log('convert to polygons')
 
     drawnItems.clearLayers();
     const region = store.getters.region
