@@ -148,6 +148,7 @@ const C_CHINA = '#a80c0c' // dark red
 const C_ARABIA= '#f5e97d' // sandy
 const C_MONGOL = '#32a895' // aqua
 const C_SASS= '#2c7332' // dark green
+const C_ENGLAND = '#004225' // british racing greeen
 
 const colors = {
   'fatimid caliphate': C_SASS,
@@ -276,6 +277,7 @@ const colors = {
   ugarit: C_SYRO_HITTITE,
   'upper egypt': C_EGYPT,
   uratu: '#ff9500', // bright orange
+  'united kingdom': C_ENGLAND,
   wei: C_CHINA,
   'western satraps': '#00ff00',
   xia: C_CHINA,
@@ -356,14 +358,20 @@ function createLayer(store, geojson) {
   }
   layer.pm.setOptions({ allowEditing: false })
   layer._name = geojson.properties.name.toLowerCase()
+  layer._partOf = geojson.properties.part_of ? geojson.properties.part_of.toLowerCase() : ''
   layer._geojson = geojson
 
-  let color = colors[`${layer._name}`]
-
+  let color = colors[`${layer._partOf}`]
   if (color) {
     layer.setStyle({fillColor: color, color: color});
   } else {
-    layer.setStyle({fillColor: '#0000FF', color: '#0000FF'});
+    let color = colors[`${layer._name}`]
+
+    if (color) {
+      layer.setStyle({fillColor: color, color: color});
+    } else {
+      layer.setStyle({fillColor: '#0000FF', color: '#0000FF'});
+    }
   }
 
   layer.on('click',function(ev) {
