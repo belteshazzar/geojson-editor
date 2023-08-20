@@ -181,6 +181,7 @@ export default {
     },
     overlayC2Lat: {
       get () {
+        console.log(this.$store.state.region.properties)
         return this.$store.state.region.properties.overlay.c2.lat
       },
       set (value) {
@@ -189,6 +190,7 @@ export default {
     },
     overlayC2Lng: {
       get () {
+        console.log(this.$store.state.region.properties)
         return this.$store.state.region.properties.overlay.c2.lng
       },
       set (value) {

@@ -1378,45 +1378,25 @@ export default {
       this.updateVisibility()
       this.$store.dispatch('xloadOverlay','/years/' + y + '.png')
 
-      if (y < -2070) {
-        console.log(y,'<-2070')
-        this.$store.commit('xupdateOverlayC1',{
-          lat: -1.4061088354351594,
-          lng: 103.88713137376364
-        })
-        this.$store.commit('xupdateOverlayC2',{
-          lat: 55.57834467218206,
-          lng: -15.292831208745458
-        })
-      } else if (y < -225) {
-        console.log(y,'< -225')
-        this.$store.commit('xupdateOverlayC1',{
-          lat: -17.476432197195518,
-          lng: 141.4990437358201
-        })
-        this.$store.commit('xupdateOverlayC2',{
-          lat: 64.0914075226231,
-          lng: -12.656121191677354
-        })
-      } else if (y < 1350) {
+      if (y < 1350) {
         console.log(y,'< 0')
         this.$store.commit('xupdateOverlayC1',{
-          lat: -19.31114335506464,
-          lng: 139.21819983498187
+          lat: -10,//-19.31114335506464,
+          lng: 135//139.21819983498187
         })
         this.$store.commit('xupdateOverlayC2',{
-          lat: 67.33986082559097,
-          lng: -33.75550165018157
+          lat: 78,//67.33986082559097,
+          lng: -32//-33.75550165018157
         })
       } else {
         console.log(y)
         this.$store.commit('xupdateOverlayC1',{
-          lat: -63.074865690586634,
-          lng: 182.8204861160042
+          lat: -57,//-63.074865690586634,
+          lng: 180//182.8204861160042
         })
         this.$store.commit('xupdateOverlayC2',{
-          lat: 73.62778879339942,
-          lng: -138.88644434423574
+          lat: 75,//73.62778879339942,
+          lng: -180//-138.88644434423574
         })
       }
 
