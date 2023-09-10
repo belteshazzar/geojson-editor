@@ -54,6 +54,7 @@ export const store = createStore({
   },
   mutations: {
     setDisplayYear(state,year) {
+      console.log(`setDisplayYear(${year})`);
       state.displayYear = year
     },
     addRegion(state,geojson) {

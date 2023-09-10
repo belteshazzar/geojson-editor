@@ -79,11 +79,16 @@
       <textarea id="geometry" name="geometry" :disabled="isNull" rows="5" v-model="geometry"></textarea>
     </div>
 
-
-    <div class="sidebar-half">
+    <div class="sidebar-qaurter">
+      <button id="copy" name="copy" @click="copy">copy</button>
+    </div>
+    <div class="sidebar-qaurter">
+      <button id="paste" name="paste" @click="paste" style="-webkit-touch-callout: none;">paste</button>
+    </div>
+    <div class="sidebar-qaurter">
       <button id="save" name="save" @click="save">save</button>
     </div>
-    <div class="sidebar-half">
+    <div class="sidebar-qaurter">
       <button id="reset" name="reset" @click="reset">clear selection</button>
     </div>
 
@@ -243,6 +248,16 @@ export default {
   methods: {
     loadOverlay() {
       this.$store.dispatch('loadOverlay',this.overlayUrl)
+    },
+    copy() {
+      document.getElementById("geometry").select();
+      document.execCommand('copy');
+      document.getElementById("geometry").setSelectionRange(0,0);
+    },
+    paste() {
+      document.getElementById("geometry").select();
+      document.execCommand('paste');
+      document.getElementById("geometry").setSelectionRange(0,0);
     },
     save() {
       this.$store.dispatch('saveRegion')
